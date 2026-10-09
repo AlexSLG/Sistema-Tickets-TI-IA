@@ -9,3 +9,4 @@ models/*/
 *.parquet
 .env
 .venv-traduccion/
+data/processed/tickets_base.csv

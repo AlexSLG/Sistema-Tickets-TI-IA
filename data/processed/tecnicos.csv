@@ -1,0 +1,9 @@
+id_tecnico,nombre,area,limite_carga,aptitud_hardware,aptitud_software,aptitud_red,aptitud_accesos,aptitud_correo,aptitud_seguridad
+T01,Carolina Méndez,Infraestructura y hardware,6,5,3,3,2,2,2
+T02,Diego Rojas,Infraestructura y hardware,8,4,3,4,2,2,2
+T03,Valeria Ortiz,Aplicaciones,6,2,5,2,3,3,2
+T04,Andrés Salazar,Aplicaciones,12,3,4,2,4,3,3
+T05,Marcela Vega,Redes y comunicaciones,6,3,2,5,2,2,4
+T06,Julián Paredes,Redes y seguridad,6,2,3,4,3,2,5
+T07,Lucía Herrera,Accesos y correo,14,2,3,2,5,5,3
+T08,Mateo Quispe,Mesa de ayuda (generalista),14,4,4,3,4,4,2

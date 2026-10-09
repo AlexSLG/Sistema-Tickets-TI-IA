@@ -1,0 +1,897 @@
+[
+  {
+    "id": "SR-01",
+    "categoria": "Red",
+    "problema": "Mi equipo no tiene internet",
+    "frases_ejemplo": [
+      "no tengo internet",
+      "mi computadora no se conecta a internet",
+      "se me fue el internet en la oficina",
+      "dice que no hay conexión a internet",
+      "no puedo navegar por ninguna página"
+    ],
+    "pasos": [
+      "Comprueba si otros equipos o el teléfono de tu compañero también se quedaron sin internet; si es así, avisa a Soporte: es una falla general.",
+      "Revisa que el cable de red esté bien conectado o que el Wi-Fi esté activado (modo avión desactivado).",
+      "Reinicia tu equipo.",
+      "Si sigue igual, apaga el router o módem 30 segundos y vuelve a encenderlo.",
+      "Si persiste, abre un ticket indicando el lugar y si algún otro equipo falla."
+    ],
+    "semilla": "tech-support (resolution_notes)"
+  },
+  {
+    "id": "SR-02",
+    "categoria": "Red",
+    "problema": "El Wi-Fi se desconecta con frecuencia",
+    "frases_ejemplo": [
+      "el wifi se corta cada rato",
+      "se me cae la conexión inalámbrica",
+      "el wifi de la oficina se desconecta constantemente",
+      "pierdo el wifi en la sala de reuniones"
+    ],
+    "pasos": [
+      "Acércate al punto de acceso y comprueba si mejora la señal.",
+      "Olvida la red Wi-Fi y vuelve a conectarte con tus credenciales.",
+      "Reinicia el adaptador de red (apágalo y enciéndelo) o el equipo.",
+      "Si ocurre a varios usuarios, reporta la zona: el soporte reiniciará o actualizará el firmware del router o añadirá un punto de acceso."
+    ],
+    "semilla": "tech-support (resolution_notes)"
+  },
+  {
+    "id": "SR-03",
+    "categoria": "Red",
+    "problema": "No puedo conectarme a la VPN",
+    "frases_ejemplo": [
+      "la vpn no conecta",
+      "no puedo entrar a la vpn desde mi casa",
+      "el cliente vpn da error de conexión",
+      "no logro conectarme a la red de la empresa desde casa"
+    ],
+    "pasos": [
+      "Verifica que tienes internet abriendo cualquier página pública.",
+      "Cierra y vuelve a abrir el cliente VPN; confirma usuario y contraseña.",
+      "Prueba otro servidor o la configuración alternativa de VPN, si tu empresa la ofrece.",
+      "Reinstala el cliente VPN si el error continúa.",
+      "Si el problema sigue, abre un ticket con el mensaje de error exacto."
+    ],
+    "semilla": "tech-support (resolution_notes)"
+  },
+  {
+    "id": "SR-04",
+    "categoria": "Red",
+    "problema": "La VPN se desconecta continuamente",
+    "frases_ejemplo": [
+      "la vpn se cae a cada rato",
+      "se corta la vpn mientras trabajo",
+      "la conexión vpn es inestable",
+      "me desconecta de la vpn cada pocos minutos"
+    ],
+    "pasos": [
+      "Comprueba que tu conexión a internet es estable (prueba una videollamada o una página pesada).",
+      "Cierra la VPN y vuelve a conectarte seleccionando otro servidor.",
+      "Desactiva temporalmente programas que usen mucha red (descargas, copias de seguridad en la nube).",
+      "Si persiste, reporta el horario y el servidor usado para que Soporte revise los registros."
+    ],
+    "semilla": "tech-support (resolution_notes)"
+  },
+  {
+    "id": "SR-05",
+    "categoria": "Red",
+    "problema": "No puedo acceder a la carpeta compartida o a la unidad de red",
+    "frases_ejemplo": [
+      "no puedo entrar a la carpeta compartida",
+      "no me deja abrir la unidad de red",
+      "no puedo mapear la unidad de red",
+      "aparece acceso denegado en la carpeta del servidor"
+    ],
+    "pasos": [
+      "Comprueba que estás conectado a la red de la empresa o a la VPN.",
+      "Escribe la ruta de la carpeta (\\\\servidor\\carpeta) en el explorador de archivos.",
+      "Si pide credenciales, introduce las de tu cuenta corporativa.",
+      "Si dice acceso denegado, solicita a tu responsable el permiso a esa carpeta mediante un ticket de Accesos."
+    ],
+    "semilla": "tech-support (resolution_notes)"
+  },
+  {
+    "id": "SR-06",
+    "categoria": "Red",
+    "problema": "La impresora de red aparece sin conexión",
+    "frases_ejemplo": [
+      "la impresora aparece offline",
+      "no puedo imprimir, dice impresora sin conexión",
+      "la impresora de red no responde",
+      "ya nadie puede imprimir en la planta"
+    ],
+    "pasos": [
+      "Comprueba que la impresora está encendida y sin avisos en su pantalla.",
+      "Apágala y enciéndela; espera a que se conecte a la red.",
+      "En tu equipo, desmarca «Usar impresora sin conexión» y vuelve a enviar el trabajo.",
+      "Si falla para todos, informa al soporte: hay que revisar su configuración de red."
+    ],
+    "semilla": "tech-support (resolution_notes)"
+  },
+  {
+    "id": "SR-07",
+    "categoria": "Red",
+    "problema": "La conexión a internet es muy lenta",
+    "frases_ejemplo": [
+      "internet está muy lento",
+      "las páginas tardan muchísimo en cargar",
+      "la velocidad de internet es pésima hoy",
+      "la red va lentísima"
+    ],
+    "pasos": [
+      "Haz una prueba de velocidad y compárala con la contratada.",
+      "Cierra descargas, vídeos y copias en la nube que consuman ancho de banda.",
+      "Prueba con cable en lugar de Wi-Fi.",
+      "Si todos en tu zona están igual, reporta la hora y la ubicación; Soporte revisará el router y al proveedor."
+    ],
+    "semilla": "tech-support (resolution_notes)"
+  },
+  {
+    "id": "SR-08",
+    "categoria": "Red",
+    "problema": "No puedo unirme a videollamadas de la empresa",
+    "frases_ejemplo": [
+      "no puedo entrar a las reuniones por video",
+      "la videollamada no conecta",
+      "teams no me deja unirme a la reunión",
+      "se corta el audio y el video en las llamadas"
+    ],
+    "pasos": [
+      "Comprueba tu conexión (VPN activa si es necesaria).",
+      "Cierra y vuelve a abrir la aplicación; actualízala si hay una versión nueva.",
+      "Permite acceso a cámara y micrófono en la configuración del sistema.",
+      "Si la red de la oficina bloquea la reunión, reporta el caso: puede ser un ajuste del firewall."
+    ],
+    "semilla": "tech-support (resolution_notes)"
+  },
+  {
+    "id": "SR-09",
+    "categoria": "Red",
+    "problema": "El teléfono IP o las llamadas VoIP se cortan",
+    "frases_ejemplo": [
+      "las llamadas voip se caen",
+      "el teléfono de la oficina se corta",
+      "se escucha entrecortado en las llamadas",
+      "mi teléfono ip no tiene tono"
+    ],
+    "pasos": [
+      "Comprueba que el cable del teléfono está bien conectado y que no hay otro equipo saturando la red.",
+      "Reinicia el teléfono desconectando su cable de red unos segundos.",
+      "Si afecta a varios, reporta el caso: puede ser un cable o un switch defectuoso."
+    ],
+    "semilla": "tech-support (resolution_notes)"
+  },
+  {
+    "id": "SR-10",
+    "categoria": "Hardware",
+    "problema": "La impresora no imprime o no es reconocida",
+    "frases_ejemplo": [
+      "la impresora no imprime",
+      "mi computadora no detecta la impresora",
+      "no puedo imprimir nada",
+      "la impresora no responde"
+    ],
+    "pasos": [
+      "Comprueba que está encendida, con papel y sin luces de error.",
+      "Desconecta y vuelve a conectar el cable USB o red.",
+      "Reinicia la impresora y el equipo.",
+      "Reinstala el controlador de la impresora desde la web del fabricante.",
+      "Si sigue, abre un ticket con el modelo."
+    ],
+    "semilla": "tech-support (resolution_notes)"
+  },
+  {
+    "id": "SR-11",
+    "categoria": "Hardware",
+    "problema": "La pantalla o el monitor parpadea",
+    "frases_ejemplo": [
+      "el monitor parpadea",
+      "la pantalla titila de vez en cuando",
+      "se ve un parpadeo en mi pantalla",
+      "la pantalla se va y vuelve"
+    ],
+    "pasos": [
+      "Revisa que los cables de vídeo (HDMI, DisplayPort) estén firmes; prueba con otro puerto.",
+      "Cambia la frecuencia de actualización en la configuración de pantalla (60 Hz).",
+      "Actualiza el controlador gráfico.",
+      "Si persiste, el monitor o el cable puede estar dañado: solicita un reemplazo por ticket."
+    ],
+    "semilla": "tech-support (resolution_notes)"
+  },
+  {
+    "id": "SR-12",
+    "categoria": "Hardware",
+    "problema": "El portátil se sobrecalienta o el ventilador hace ruido",
+    "frases_ejemplo": [
+      "mi laptop se calienta mucho",
+      "el ventilador del portátil hace ruido",
+      "la computadora se apaga por el calor",
+      "el equipo está muy caliente y va lento"
+    ],
+    "pasos": [
+      "Apoya el equipo sobre una superficie plana y evita cojines o mantas.",
+      "Cierra programas que usen mucho procesador (Administrador de tareas).",
+      "Solicita la limpieza de ventilación y la actualización de la BIOS.",
+      "Si se apaga solo, apaga el equipo y abre un ticket con prioridad."
+    ],
+    "semilla": "tech-support (resolution_notes)"
+  },
+  {
+    "id": "SR-13",
+    "categoria": "Hardware",
+    "problema": "La batería del portátil dura poco o no carga",
+    "frases_ejemplo": [
+      "la batería se acaba rápido",
+      "el portátil no carga",
+      "la batería no carga al enchufar el cargador",
+      "dura muy poco la batería"
+    ],
+    "pasos": [
+      "Prueba con otro enchufe y comprueba que el cargador está bien conectado.",
+      "Revisa que el cargador sea el original y sin daños.",
+      "Reduce el brillo y cierra aplicaciones en segundo plano.",
+      "Si sigue sin cargar o dura minutos, solicita revisión o cambio de batería."
+    ],
+    "semilla": "tech-support (resolution_notes)"
+  },
+  {
+    "id": "SR-14",
+    "categoria": "Hardware",
+    "problema": "El ratón o el teclado no funcionan",
+    "frases_ejemplo": [
+      "el mouse no funciona",
+      "el teclado no responde",
+      "el puntero se congela",
+      "algunas teclas se quedan pegadas",
+      "el touchpad no va"
+    ],
+    "pasos": [
+      "Desconecta y vuelve a conectar el dispositivo (o cambia las pilas si es inalámbrico).",
+      "Prueba otro puerto USB.",
+      "Reinicia el equipo.",
+      "Actualiza o revierte el controlador desde el Administrador de dispositivos.",
+      "Si continúa, solicita reemplazo."
+    ],
+    "semilla": "tech-support (resolution_notes)"
+  },
+  {
+    "id": "SR-15",
+    "categoria": "Hardware",
+    "problema": "El equipo no enciende",
+    "frases_ejemplo": [
+      "mi computadora no enciende",
+      "el pc no arranca",
+      "presiono el botón y no pasa nada",
+      "la luz parpadea y no enciende"
+    ],
+    "pasos": [
+      "Comprueba que el cable de corriente y la regleta están conectados y con luz.",
+      "Prueba con otro enchufe.",
+      "Desconecta todos los periféricos y vuelve a intentarlo.",
+      "Si el botón de encendido parpadea sin arrancar, puede ser la fuente: abre un ticket con prioridad."
+    ],
+    "semilla": "tech-support (resolution_notes)"
+  },
+  {
+    "id": "SR-16",
+    "categoria": "Hardware",
+    "problema": "Un dispositivo USB, disco externo o webcam no es reconocido",
+    "frases_ejemplo": [
+      "no reconoce mi disco duro externo",
+      "el usb no funciona",
+      "la cámara web dejó de funcionar",
+      "mi pendrive no aparece"
+    ],
+    "pasos": [
+      "Prueba otro puerto USB y otro cable.",
+      "Reinicia el equipo con el dispositivo conectado.",
+      "Comprueba en el Administrador de dispositivos si aparece con un aviso y actualiza o revierte el controlador.",
+      "Si dejó de funcionar tras una actualización, informa el caso para revertirla."
+    ],
+    "semilla": "tech-support (resolution_notes)"
+  },
+  {
+    "id": "SR-17",
+    "categoria": "Hardware",
+    "problema": "Mensaje de fallo del disco duro o SSD",
+    "frases_ejemplo": [
+      "me sale un aviso de fallo del disco",
+      "el disco duro hace ruidos raros",
+      "alerta de que el ssd va a fallar",
+      "perdí datos por un fallo del disco"
+    ],
+    "pasos": [
+      "Guarda de inmediato lo importante en una unidad de red o en la nube.",
+      "No sigas usando el equipo para trabajos pesados.",
+      "Abre un ticket con prioridad Alta: Soporte revisará el estado del disco y gestionará el reemplazo."
+    ],
+    "semilla": "tech-support (resolution_notes)"
+  },
+  {
+    "id": "SR-18",
+    "categoria": "Hardware",
+    "problema": "No hay sonido o los altavoces suenan con ruido",
+    "frases_ejemplo": [
+      "no sale sonido",
+      "los altavoces tienen interferencia",
+      "el audio de la reunión no se escucha",
+      "se oye un zumbido en las bocinas"
+    ],
+    "pasos": [
+      "Comprueba el volumen y que el dispositivo de salida correcto esté seleccionado.",
+      "Prueba con otro conector o con auriculares.",
+      "Actualiza el controlador de audio y reinicia el equipo.",
+      "Si continúa, solicita revisión del dispositivo."
+    ],
+    "semilla": "tech-support (resolution_notes)"
+  },
+  {
+    "id": "SR-19",
+    "categoria": "Software",
+    "problema": "Una aplicación se cierra o se cuelga",
+    "frases_ejemplo": [
+      "la aplicación se cierra sola",
+      "el programa se congela",
+      "se me cuelga el programa al abrirlo",
+      "la app se cae cuando la uso"
+    ],
+    "pasos": [
+      "Cierra la aplicación desde el Administrador de tareas y vuelve a abrirla.",
+      "Reinicia el equipo.",
+      "Comprueba si hay una actualización de la aplicación e instálala.",
+      "Si falla tras una actualización, informa la versión y el momento exacto del cierre en un ticket."
+    ],
+    "semilla": "tech-support (resolution_notes)"
+  },
+  {
+    "id": "SR-20",
+    "categoria": "Software",
+    "problema": "No se puede instalar una actualización",
+    "frases_ejemplo": [
+      "falla la actualización de windows",
+      "no puedo instalar la actualización",
+      "la actualización da error al reiniciar",
+      "se queda la actualización a medias"
+    ],
+    "pasos": [
+      "Comprueba que tienes espacio libre en disco (al menos 10 GB).",
+      "Reinicia e inténtalo de nuevo.",
+      "Limpia la caché de actualizaciones o ejecuta el solucionador de problemas de Windows Update.",
+      "Si hay un código de error, anótalo en el ticket: se hará la instalación manual."
+    ],
+    "semilla": "tech-support (resolution_notes)"
+  },
+  {
+    "id": "SR-21",
+    "categoria": "Software",
+    "problema": "Mi licencia expiró o no se acepta la clave",
+    "frases_ejemplo": [
+      "la licencia no se activa",
+      "dice que mi licencia expiró",
+      "no acepta la clave de producto",
+      "el programa pide activar de nuevo"
+    ],
+    "pasos": [
+      "Comprueba que tienes sesión iniciada con tu cuenta corporativa.",
+      "Verifica que la clave está bien escrita (sin espacios).",
+      "Si la licencia venció o no es válida, solicita la renovación o una clave nueva por ticket indicando el programa."
+    ],
+    "semilla": "tech-support (resolution_notes)"
+  },
+  {
+    "id": "SR-22",
+    "categoria": "Software",
+    "problema": "Error 404 o la página del sistema no carga",
+    "frases_ejemplo": [
+      "me sale error 404",
+      "la página del sistema no abre",
+      "el panel no carga",
+      "no carga la página de inicio de sesión de la app"
+    ],
+    "pasos": [
+      "Actualiza la página con Ctrl + F5 y prueba en otro navegador.",
+      "Borra la caché y las cookies del navegador.",
+      "Comprueba que no hay una URL antigua guardada: entra desde el portal oficial.",
+      "Si el error continúa, reporta el enlace exacto y la hora."
+    ],
+    "semilla": "tech-support (resolution_notes)"
+  },
+  {
+    "id": "SR-23",
+    "categoria": "Software",
+    "problema": "La aplicación va lenta",
+    "frases_ejemplo": [
+      "el programa va muy lento",
+      "el sistema tarda mucho en responder",
+      "el dashboard está lentísimo",
+      "mi computadora está muy lenta"
+    ],
+    "pasos": [
+      "Cierra pestañas y programas que no uses.",
+      "Actualiza el navegador y borra la caché.",
+      "Reinicia el equipo.",
+      "Comprueba que no hay una actualización pendiente.",
+      "Si persiste, reporta qué aplicación y en qué horarios ocurre."
+    ],
+    "semilla": "tech-support (resolution_notes)"
+  },
+  {
+    "id": "SR-24",
+    "categoria": "Software",
+    "problema": "Los datos no se sincronizan entre dispositivos o con la nube",
+    "frases_ejemplo": [
+      "no se sincroniza con la nube",
+      "mis archivos no se actualizan en el móvil",
+      "la sincronización falla",
+      "no aparece lo que guardé en el otro equipo"
+    ],
+    "pasos": [
+      "Comprueba que tienes conexión y la misma cuenta en ambos dispositivos.",
+      "Cierra sesión y vuelve a iniciarla.",
+      "Reinicia los ajustes de sincronización de la aplicación.",
+      "Si falla tras un cambio de contraseña, actualiza las credenciales guardadas."
+    ],
+    "semilla": "tech-support (resolution_notes)"
+  },
+  {
+    "id": "SR-25",
+    "categoria": "Software",
+    "problema": "No puedo guardar archivos o registros",
+    "frases_ejemplo": [
+      "no me deja guardar el documento",
+      "no puedo guardar mis cambios",
+      "da error al guardar en el sistema",
+      "no guarda los registros nuevos"
+    ],
+    "pasos": [
+      "Guarda una copia en otra carpeta (Documentos) para no perder el trabajo.",
+      "Comprueba que tienes permiso de escritura en la carpeta de destino.",
+      "Si es un sistema corporativo y sale error de permisos, solicita el acceso por ticket de Accesos."
+    ],
+    "semilla": "tech-support (resolution_notes)"
+  },
+  {
+    "id": "SR-26",
+    "categoria": "Software",
+    "problema": "No puedo exportar o imprimir informes",
+    "frases_ejemplo": [
+      "error al exportar el reporte",
+      "no me deja imprimir desde el navegador",
+      "el informe no se genera",
+      "falla la exportación a excel"
+    ],
+    "pasos": [
+      "Prueba con otro formato (PDF o CSV) o con otro navegador.",
+      "Permite las ventanas emergentes del sitio.",
+      "Comprueba que la impresora está habilitada en el navegador.",
+      "Si el módulo da error, copia el mensaje y repórtalo."
+    ],
+    "semilla": "tech-support (resolution_notes)"
+  },
+  {
+    "id": "SR-27",
+    "categoria": "Software",
+    "problema": "Microsoft Office se congela o no abre los documentos",
+    "frases_ejemplo": [
+      "word se congela al guardar",
+      "excel no abre mi archivo",
+      "office se queda en blanco",
+      "el programa de oficina se cierra solo"
+    ],
+    "pasos": [
+      "Abre la aplicación en modo seguro (mantén Ctrl al abrirla).",
+      "Desactiva los complementos.",
+      "Usa «Reparar» desde Configuración › Aplicaciones › Microsoft Office.",
+      "Si no se resuelve, solicita la reinstalación."
+    ],
+    "semilla": "tech-support (resolution_notes)"
+  },
+  {
+    "id": "SR-28",
+    "categoria": "Accesos",
+    "problema": "Olvidé mi contraseña",
+    "frases_ejemplo": [
+      "olvidé mi contraseña",
+      "no recuerdo la clave de mi cuenta",
+      "necesito restablecer mi contraseña",
+      "perdí mi contraseña y no puedo entrar"
+    ],
+    "pasos": [
+      "Usa el enlace «¿Olvidaste tu contraseña?» de la pantalla de inicio de sesión.",
+      "Sigue las instrucciones enviadas a tu correo o teléfono de recuperación.",
+      "Si no recibes el mensaje, abre un ticket de Accesos con tu nombre y usuario: Soporte verificará tu identidad y la restablecerá."
+    ],
+    "semilla": "tech-support (resolution_notes)"
+  },
+  {
+    "id": "SR-29",
+    "categoria": "Accesos",
+    "problema": "Mi cuenta está bloqueada",
+    "frases_ejemplo": [
+      "mi cuenta está bloqueada",
+      "me bloquearon el usuario",
+      "dice que la cuenta está suspendida",
+      "escribí mal la clave y ahora no puedo entrar"
+    ],
+    "pasos": [
+      "Espera unos 15 minutos: muchas cuentas se desbloquean solas.",
+      "Comprueba que no tienes Bloq Mayús activado y que el idioma del teclado es el correcto.",
+      "Si sigue bloqueada, solicita el desbloqueo por ticket de Accesos."
+    ],
+    "semilla": "tech-support (resolution_notes)"
+  },
+  {
+    "id": "SR-30",
+    "categoria": "Accesos",
+    "problema": "No puedo iniciar sesión en una aplicación",
+    "frases_ejemplo": [
+      "no puedo iniciar sesión",
+      "el login da error",
+      "la app se queda en la pantalla de acceso",
+      "no me deja entrar con mi usuario"
+    ],
+    "pasos": [
+      "Comprueba usuario y contraseña (sin espacios).",
+      "Borra la caché del navegador o prueba en una ventana de incógnito.",
+      "Cierra la sesión de otras pestañas o dispositivos.",
+      "Si usas doble factor, comprueba la hora de tu teléfono.",
+      "Si no funciona, reporta el mensaje de error exacto."
+    ],
+    "semilla": "tech-support (resolution_notes)"
+  },
+  {
+    "id": "SR-31",
+    "categoria": "Accesos",
+    "problema": "Necesito acceso o permisos a una carpeta, sistema o aplicación",
+    "frases_ejemplo": [
+      "necesito acceso al sistema",
+      "puedo tener permiso para esa carpeta",
+      "solicito acceso para un compañero nuevo",
+      "me dan permisos para editar el documento"
+    ],
+    "pasos": [
+      "Abre un ticket de Accesos indicando el recurso exacto (ruta o nombre del sistema).",
+      "Indica quién autoriza el acceso (tu responsable) y el motivo.",
+      "Cuando se apruebe, cierra sesión y vuelve a entrar para que se apliquen los permisos."
+    ],
+    "semilla": "tech-support (resolution_notes)"
+  },
+  {
+    "id": "SR-32",
+    "categoria": "Accesos",
+    "problema": "Alta de un usuario nuevo",
+    "frases_ejemplo": [
+      "necesito crear una cuenta para un empleado nuevo",
+      "alta de usuario",
+      "se incorpora una persona y necesita acceso",
+      "crear usuario para el nuevo compañero"
+    ],
+    "pasos": [
+      "Abre un ticket de Accesos con nombre completo, puesto, área, responsable y fecha de ingreso.",
+      "Indica los sistemas y carpetas que necesitará (por rol).",
+      "Soporte creará la cuenta y enviará las credenciales temporales al responsable."
+    ],
+    "semilla": "tech-support (resolution_notes)"
+  },
+  {
+    "id": "SR-33",
+    "categoria": "Accesos",
+    "problema": "El doble factor de autenticación no me llega",
+    "frases_ejemplo": [
+      "no me llega el código de verificación",
+      "el segundo factor no funciona",
+      "perdí el móvil con el autenticador",
+      "el código del autenticador es inválido"
+    ],
+    "pasos": [
+      "Comprueba que la hora de tu teléfono está en automático.",
+      "Solicita el código de nuevo y espera un minuto.",
+      "Si cambiaste de móvil o lo perdiste, abre un ticket de Accesos: Soporte verificará tu identidad y restablecerá el doble factor."
+    ],
+    "semilla": "tech-support (resolution_notes)"
+  },
+  {
+    "id": "SR-34",
+    "categoria": "Accesos",
+    "problema": "Mis credenciales nuevas no funcionan",
+    "frases_ejemplo": [
+      "mi usuario nuevo no funciona",
+      "la clave temporal no entra",
+      "no puedo entrar con las credenciales que me dieron",
+      "cambié la contraseña y ya no entro"
+    ],
+    "pasos": [
+      "Escribe la contraseña a mano (no la pegues) y respeta mayúsculas y minúsculas.",
+      "Si es una clave temporal, usa «Cambiar contraseña» en el primer acceso.",
+      "Espera 5–10 minutos tras un cambio de clave: la actualización tarda en replicarse.",
+      "Si continúa, solicita el restablecimiento."
+    ],
+    "semilla": "tech-support (resolution_notes)"
+  },
+  {
+    "id": "SR-35",
+    "categoria": "Accesos",
+    "problema": "No puedo acceder al portal seguro o al panel después de restablecer la clave",
+    "frases_ejemplo": [
+      "no puedo entrar al portal seguro",
+      "no accedo al dashboard desde que cambié la contraseña",
+      "el panel me dice acceso denegado",
+      "el portal no me reconoce"
+    ],
+    "pasos": [
+      "Cierra todas las sesiones y borra las cookies del sitio.",
+      "Entra desde el enlace oficial del portal (no desde marcadores antiguos).",
+      "Si sigue sin acceso, solicita el restablecimiento de credenciales y la comprobación de permisos."
+    ],
+    "semilla": "tech-support (resolution_notes)"
+  },
+  {
+    "id": "SR-36",
+    "categoria": "Accesos",
+    "problema": "Solicitud de baja de cuenta o de datos",
+    "frases_ejemplo": [
+      "quiero que eliminen mi cuenta",
+      "solicito dar de baja a un usuario",
+      "borrar mi cuenta por privacidad",
+      "baja de un empleado que se fue"
+    ],
+    "pasos": [
+      "Abre un ticket de Accesos con el usuario, el motivo y la fecha de baja.",
+      "Indica a quién se traspasan los archivos y correos.",
+      "Soporte desactivará los accesos, hará la copia necesaria y confirmará por escrito."
+    ],
+    "semilla": "tech-support (resolution_notes)"
+  },
+  {
+    "id": "SR-37",
+    "categoria": "Correo",
+    "problema": "No puedo enviar o recibir correos",
+    "frases_ejemplo": [
+      "no puedo enviar correos",
+      "no me llegan los emails",
+      "mi correo no envía",
+      "la bandeja de entrada no recibe nada"
+    ],
+    "pasos": [
+      "Comprueba tu conexión a internet y que el correo no está en modo sin conexión.",
+      "Revisa la carpeta de correo no deseado.",
+      "Confirma que tu buzón no está lleno.",
+      "Cierra y abre de nuevo Outlook; si sigue, abre un ticket con el mensaje de error."
+    ],
+    "semilla": "redacción propia"
+  },
+  {
+    "id": "SR-38",
+    "categoria": "Correo",
+    "problema": "Outlook no sincroniza o se bloquea",
+    "frases_ejemplo": [
+      "outlook no sincroniza",
+      "outlook se cierra al escribir un correo",
+      "el correo no se actualiza en el celular",
+      "outlook se queda cargando"
+    ],
+    "pasos": [
+      "Cierra Outlook por completo y vuelve a abrirlo.",
+      "Reinicia el equipo.",
+      "Abre Outlook en modo seguro (outlook.exe /safe) para descartar complementos.",
+      "Crea un perfil nuevo de Outlook o usa la versión web mientras tanto.",
+      "Si ocurre tras una actualización, repórtalo."
+    ],
+    "semilla": "redacción propia"
+  },
+  {
+    "id": "SR-39",
+    "categoria": "Correo",
+    "problema": "Mi buzón está lleno",
+    "frases_ejemplo": [
+      "mi buzón está lleno",
+      "dice que superé el límite de almacenamiento",
+      "no puedo recibir correos por falta de espacio",
+      "la casilla de correo está llena aunque borré correos"
+    ],
+    "pasos": [
+      "Elimina mensajes con adjuntos grandes (ordena por tamaño) y vacía la carpeta «Elementos eliminados».",
+      "Mueve el correo antiguo a un archivo (.pst) o archivo en línea.",
+      "Si aun así sigue lleno, solicita ampliar la cuota por ticket."
+    ],
+    "semilla": "redacción propia"
+  },
+  {
+    "id": "SR-40",
+    "categoria": "Correo",
+    "problema": "Mis correos llegan como spam o los importantes van a no deseado",
+    "frases_ejemplo": [
+      "mis correos se marcan como spam",
+      "los emails importantes llegan a la carpeta de spam",
+      "el filtro bloquea correos buenos",
+      "mis mensajes no llegan a los clientes"
+    ],
+    "pasos": [
+      "Marca el mensaje como «No es spam» y añade el remitente a contactos seguros.",
+      "Si los destinatarios no reciben tus correos, pídeles revisar su carpeta de spam.",
+      "Reporta el caso con ejemplos: Soporte revisará los filtros y los registros SPF/DKIM del dominio."
+    ],
+    "semilla": "redacción propia"
+  },
+  {
+    "id": "SR-41",
+    "categoria": "Correo",
+    "problema": "No puedo adjuntar o abrir archivos adjuntos",
+    "frases_ejemplo": [
+      "no puedo adjuntar archivos",
+      "los adjuntos no se abren",
+      "no deja abrir el pdf adjunto",
+      "el archivo que envío es demasiado grande"
+    ],
+    "pasos": [
+      "Comprueba el tamaño: el límite habitual es de 20–25 MB; para archivos grandes usa un enlace de la nube.",
+      "Guarda el adjunto en el escritorio y ábrelo desde ahí.",
+      "Si el formato está bloqueado por seguridad, pide el archivo comprimido en .zip."
+    ],
+    "semilla": "tech-support (resolution_notes)"
+  },
+  {
+    "id": "SR-42",
+    "categoria": "Correo",
+    "problema": "Migración de correo o cambio de cliente",
+    "frases_ejemplo": [
+      "necesito migrar mi correo a gmail",
+      "pasar mis correos a otro servidor",
+      "cambiar de cuenta de correo conservando mis mensajes",
+      "migración de buzones"
+    ],
+    "pasos": [
+      "Abre un ticket indicando buzones, tamaño aproximado y fecha deseada.",
+      "Haz una copia de tus mensajes importantes (exportar .pst) antes de la migración.",
+      "Soporte planificará el cambio y te avisará para que no uses el buzón durante el corte."
+    ],
+    "semilla": "redacción propia"
+  },
+  {
+    "id": "SR-43",
+    "categoria": "Correo",
+    "problema": "Falta la firma o no puedo crear reglas y calendarios",
+    "frases_ejemplo": [
+      "cómo cambio mi firma de correo",
+      "no me deja crear reglas en outlook",
+      "el calendario no muestra mis reuniones",
+      "las invitaciones no llegan"
+    ],
+    "pasos": [
+      "Firma: Archivo › Opciones › Correo › Firmas.",
+      "Reglas: Inicio › Reglas › Administrar reglas y alertas.",
+      "Calendario: comprueba que estás en el calendario correcto y sincroniza (F9).",
+      "Si no funciona, indica la versión de Outlook en un ticket."
+    ],
+    "semilla": "redacción propia"
+  },
+  {
+    "id": "SR-44",
+    "categoria": "Seguridad",
+    "problema": "Recibí un correo sospechoso o de phishing",
+    "frases_ejemplo": [
+      "me llegó un correo sospechoso",
+      "creo que es phishing",
+      "me piden mis datos por correo",
+      "recibí un enlace raro de mi banco"
+    ],
+    "pasos": [
+      "No abras enlaces ni adjuntos, y no respondas.",
+      "Reenvía el correo como adjunto al equipo de Seguridad o usa el botón «Notificar phishing».",
+      "Borra el mensaje.",
+      "Si ya hiciste clic o diste datos, cambia tu contraseña y abre un ticket de seguridad con prioridad Alta."
+    ],
+    "semilla": "redacción propia"
+  },
+  {
+    "id": "SR-45",
+    "categoria": "Seguridad",
+    "problema": "Creo que mi equipo tiene un virus o malware",
+    "frases_ejemplo": [
+      "mi pc tiene virus",
+      "la computadora hace cosas raras, creo que es un virus",
+      "aparecen ventanas emergentes",
+      "el antivirus detectó una amenaza",
+      "va lentísima y sale publicidad"
+    ],
+    "pasos": [
+      "Desconecta el equipo de la red (cable o Wi-Fi) y no lo apagues.",
+      "No entres a cuentas ni cambies contraseñas desde ese equipo.",
+      "Avisa a Soporte con prioridad Alta indicando qué viste.",
+      "No ejecutes más programas ni conectes unidades USB."
+    ],
+    "semilla": "redacción propia"
+  },
+  {
+    "id": "SR-46",
+    "categoria": "Seguridad",
+    "problema": "El antivirus no se inicia o no se actualiza",
+    "frases_ejemplo": [
+      "el antivirus no inicia",
+      "mi antivirus está desactualizado",
+      "no se abre el antivirus",
+      "el antivirus no se actualiza"
+    ],
+    "pasos": [
+      "Reinicia el equipo.",
+      "Abre el antivirus y ejecuta una actualización manual de definiciones.",
+      "Comprueba que la fecha y hora del equipo son correctas.",
+      "Si continúa, solicita la reinstalación del agente de seguridad."
+    ],
+    "semilla": "redacción propia"
+  },
+  {
+    "id": "SR-47",
+    "categoria": "Seguridad",
+    "problema": "Acceso no autorizado o actividad sospechosa en mi cuenta",
+    "frases_ejemplo": [
+      "alguien entró a mi cuenta",
+      "veo inicios de sesión que no reconozco",
+      "hay accesos no autorizados",
+      "me llegó una alerta de intento de acceso"
+    ],
+    "pasos": [
+      "Cambia tu contraseña de inmediato desde un equipo de confianza.",
+      "Cierra todas las sesiones activas.",
+      "Activa o revisa el doble factor.",
+      "Abre un ticket de seguridad con prioridad Alta indicando fecha y hora de la actividad sospechosa."
+    ],
+    "semilla": "redacción propia"
+  },
+  {
+    "id": "SR-48",
+    "categoria": "Seguridad",
+    "problema": "Sospecha de filtración de datos o pérdida de un dispositivo",
+    "frases_ejemplo": [
+      "perdí mi laptop",
+      "me robaron el celular de trabajo",
+      "creo que se filtraron datos",
+      "se expuso información de clientes"
+    ],
+    "pasos": [
+      "Avisa de inmediato a Soporte y a Seguridad: cada minuto cuenta.",
+      "Indica qué información contenía el dispositivo o qué datos pudieron salir.",
+      "Cambia las contraseñas desde otro equipo.",
+      "Soporte bloqueará o borrará el dispositivo de forma remota y abrirá el incidente."
+    ],
+    "semilla": "redacción propia"
+  },
+  {
+    "id": "SR-49",
+    "categoria": "Seguridad",
+    "problema": "Pregunta sobre buenas prácticas de seguridad",
+    "frases_ejemplo": [
+      "cómo protejo mis datos",
+      "qué medidas de seguridad tienen",
+      "buenas prácticas para contraseñas",
+      "cómo cifro un archivo"
+    ],
+    "pasos": [
+      "Usa contraseñas largas y distintas por servicio, con un gestor de contraseñas.",
+      "Activa el doble factor en todos los servicios que lo permitan.",
+      "Mantén el sistema y las aplicaciones actualizados.",
+      "No instales programas de fuentes no oficiales.",
+      "Para dudas concretas, consulta la política de seguridad o abre un ticket de consulta."
+    ],
+    "semilla": "redacción propia"
+  },
+  {
+    "id": "SR-50",
+    "categoria": "Seguridad",
+    "problema": "Mensaje de firewall o sitio bloqueado",
+    "frases_ejemplo": [
+      "el firewall bloquea una página",
+      "no puedo entrar a un sitio, dice bloqueado",
+      "el sistema dice que el sitio no es seguro",
+      "una aplicación fue bloqueada por seguridad"
+    ],
+    "pasos": [
+      "Comprueba que la dirección es la correcta y que necesitas ese sitio para trabajar.",
+      "No desactives el antivirus ni el firewall por tu cuenta.",
+      "Si es legítimo, abre un ticket indicando la dirección y el motivo de negocio: Seguridad evaluará su desbloqueo."
+    ],
+    "semilla": "redacción propia"
+  }
+]

@@ -1,6 +1,7 @@
 # Reglas de etiquetado (paso 4)
 
 Implementación: `src/data/mapeo.py` (reglas), `src/data/unificar.py` (unificación y depuración) y `src/data/aumentar.py` (aumento).
+Este documento recoge las **reglas finales**, con las correcciones derivadas de la auditoría manual (`reports/auditoria_etiquetas.md`, apartado 8).
 Todas las reglas se aplican sobre el texto **en español**, en minúsculas y sin acentos. Semilla fija: 42.
 Los datos auxiliares (prioridad derivada, impacto, urgencia, usuarios afectados) no vienen de ninguna fuente y se derivan con las reglas de este documento.
 
@@ -38,16 +39,16 @@ Se compararon las reglas por palabras clave con las categorías de referencia de
 
 | Referencia | Filas | Coincidencia |
 |---|---:|---:|
-| `Dataset_ticket.xlsx` (sin Internal Application) | 1 700 | 89,2 % |
+| `Dataset_ticket.xlsx` (sin Internal Application) | 1 700 | 88,1 % |
 | `tech-support` | 144 | 73,6 % |
 
-Parte del desacuerdo no es error de las reglas sino de la referencia: p. ej. un ticket de subcategoría "Operating System" que habla de un segundo monitor, o un ticket `network` de `tech-support` que dice "no se puede acceder a la unidad compartida" (las reglas dicen Accesos). Estas dos fuentes usan siempre su etiqueta de origen; las reglas solo etiquetan la fuente principal y la v1, donde no hay referencia, así que **su exactitud real no se ha medido** y se estima algo inferior a la de estos contrastes (textos más largos y con relatos ajenos a TI).
+Parte del desacuerdo no es error de las reglas sino de la referencia: p. ej. un ticket de subcategoría "Operating System" que habla de un segundo monitor, o un ticket `network` de `tech-support` que dice "no se puede acceder a la unidad compartida" (las reglas dicen Accesos). Estas dos fuentes usan siempre su etiqueta de origen; las reglas solo etiquetan la fuente principal y la v1, donde no hay referencia, así que su exactitud se midió con la auditoría manual (apartado 8): ≈ 85 % en categoría y ≈ 93 % en prioridad sobre una muestra sin ajustar (n = 60), con un 79 % / 80 % antes de corregir las reglas.
 
 ## 2. Relevancia de TI y depuración
 
 | Paso | Regla |
 |---|---|
-| Fuera de TI | Se descarta un ticket de la fuente principal o de la v1 si su texto trata un tema puramente comercial (campañas y métricas de marketing, redes sociales, SEO, tráfico del sitio, facturación, reembolsos, precios, garantía, SLA, cuenta demo, documentación de producto, estrategias de inversión) **y** no menciona nada técnico (servidor, plataforma, sistema, software, aplicación, herramienta, base de datos, API, integración, error, fallo, caída, VPN, red, acceso, contraseña, correo, dispositivo, conexión, actualización, configuración, sincronización, lentitud…). Un relato comercial con un problema técnico ("la plataforma de campañas se cayó") se conserva. Descartadas: 72 |
+| Fuera de TI | Se descarta un ticket de la fuente principal o de la v1 si su texto trata un tema puramente comercial (campañas y métricas de marketing, redes sociales, SEO, tráfico del sitio, facturación, reembolsos, precios, garantía, SLA, cuenta demo, documentación de producto, estrategias de inversión) **y** no menciona nada técnico (servidor, plataforma, sistema, software, aplicación, herramienta, base de datos, API, integración, error, fallo, caída, VPN, red, acceso, contraseña, correo, dispositivo, conexión, actualización, configuración, sincronización, lentitud…). Un relato comercial con un problema técnico ("la plataforma de campañas se cayó") se conserva. Descartadas: 262 (incluye la regla dura de la auditoría: facturación, precios, publicidad, suscripciones, métricas de campañas, etc., que se descarta aunque aparezca una palabra técnica) |
 | Muy corto | Descripción con menos de 3 palabras: 0 |
 | Duplicados exactos | Mismo título + descripción normalizados: 35 |
 | Casi duplicados | Coseno TF-IDF (palabras, 1–2-gramas) ≥ 0,88; se conserva la fuente de mayor rango (`tech-support` > principal > xlsx > v1): 49, todos dentro de la misma fuente |
@@ -65,7 +66,7 @@ Normalizaciones de estilo aplicadas a la traducción (detectadas en `reports/cal
 | `high` en fuente principal y v1 | → **Crítica** si el texto indica caída total, servicio de producción, sistema crítico, "toda la empresa", "todos los usuarios", pérdida de datos, ransomware, brecha de datos…; o si, además, lleva una etiqueta `Outage` / `Data Breach` y habla de interrupción, caída, colapso, indisponibilidad o varios sistemas afectados | regla |
 | `Dataset_ticket.xlsx` (sin prioridad) | Impacto y urgencia que indica el texto (puntajes de 3.2), pasados por la matriz de 3.1 | regla |
 
-Referencia: en `issues.csv` Highest + Blocker son ≈ 8,4 % de las prioridades conocidas. Resultado: **Crítica = 7,7 %** del conjunto final (7,9 % de los tickets reales).
+Referencia: en `issues.csv` Highest + Blocker son ≈ 8,4 % de las prioridades conocidas. Resultado: **Crítica = 7,6 %** del conjunto final (7,9 % de los tickets reales).
 
 ## 4. Impacto, urgencia y usuarios afectados
 
@@ -83,19 +84,19 @@ Se suman niveles (Bajo/Baja = 1, Medio/Media = 2, Alto/Alta = 3): suma 2–3 →
 
 ## 5. Origen de la etiqueta
 
-`origen_etiqueta`: `fuente` si categoría y prioridad vienen directamente del mapeo de la fuente (145 filas de `tech-support`), `regla` si alguna se derivó con reglas (8 879) y `aumento` para las variantes por retrotraducción (552). Además, `origen_categoria` y `origen_prioridad` dan el detalle por campo.
+`origen_etiqueta`: `fuente` si categoría y prioridad vienen directamente del mapeo de la fuente (145 filas de `tech-support`), `regla` si alguna se derivó con reglas (8 689) y `aumento` para las variantes por retrotraducción (545). Además, `origen_categoria` y `origen_prioridad` dan el detalle por campo.
 
 ## 6. Balance y aumento
 
-Objetivo: ≥ 600 tickets por categoría. Antes del aumento: Software 3 983, Red 1 574, Seguridad 1 459, Hardware 1 454, Accesos 384, Correo 170.
+Objetivo: ≥ 600 tickets por categoría. Antes del aumento: Software 4 274, Red 1 437, Seguridad 1 481, Hardware 1 148, Accesos 354, Correo 140.
 Se aumentan solo Accesos y Correo, por retrotraducción de tickets reales con idioma intermedio inglés, alemán o italiano (ver `reports/aumento_resumen.md`).
 
 | Categoría | Reales | Aumentados | Total |
 |---|---:|---:|---:|
-| Accesos | 384 | 216 | **600** |
-| Correo | 170 | 336 | **506** |
+| Accesos | 354 | 246 | **600** |
+| Correo | 140 | 299 | **439** |
 
-**Correo no llega a 600:** la fuente tiene pocos tickets de correo y las variantes de textos tan cortos se parecen demasiado al original. Dos de cada tres tickets de Correo son variantes (33,6 % reales), y un tercio de Accesos (64 % real).
+**Correo no llega a 600 (439):** la fuente tiene pocos tickets de correo y las variantes de textos tan cortos se parecen demasiado al original. Dos de cada tres tickets de Correo son variantes (32 % reales; de los 140 reales, 100 son frases cortas de `Dataset_ticket.xlsx`, 22 de la v1 y solo 18 de la fuente principal), y el 41 % de Accesos (59 % real).
 Para no contaminar la evaluación, cada variante conserva el `grupo` de su ticket original y **la división train/val/test del paso 5 debe mantener cada grupo completo en un solo subconjunto**; las métricas de Correo y Accesos deben leerse con esta salvedad, y conviene que el conjunto de prueba escrito a mano (SCRUM-100) incluya tickets reales de estas dos clases.
 
 ## 7. Limitaciones conocidas
@@ -104,3 +105,16 @@ Para no contaminar la evaluación, cada variante conserva el `grupo` de su ticke
 - Prioridad de `Dataset_ticket.xlsx`: derivada del texto, tiende a Baja (79 % de sus tickets); es la fuente de menor calidad para esa etiqueta.
 - Impacto, urgencia y usuarios afectados no existen en ninguna fuente; son una aproximación coherente con la matriz y con el relato, no una medida.
 - Los textos de la fuente principal siguen un estilo de plantilla (relatos de hospital, agencia de marketing, firma financiera) que no se parece al de usuarios reales.
+
+## 8. Ajustes tras la auditoría de etiquetas
+
+La revisión manual de 200 tickets (acierto inicial 79 % en categoría y 80 % en prioridad) mostró errores sistemáticos, corregidos así (detalle en `reports/auditoria_etiquetas.md`):
+
+- **Seguridad:** nuevos patrones para "no autorizado", "sospechoso", "comprometido", "violado" y marcas de antivirus (Kaspersky, Bitdefender, Norton, McAfee, Avast, ESET).
+- **Software:** interrupciones del servicio, tiempo de inactividad, sobrecarga del servidor, sincronización, mejoras de interfaz y herramientas de campañas por correo (Mailchimp, SendGrid) pasan a Software.
+- **Correo:** Outlook baja de peso (3,5 → 2,5) porque aparece en listas de productos afectados.
+- **Hardware:** "equipo" deja de ser señal (casi siempre es el equipo de trabajo); en empate, Software va antes que Hardware.
+- **Fuera de TI, regla dura:** facturación y reembolsos, precios, publicidad, suscripciones, seguros, información de producto, previsiones de inversión, métricas de compromiso de campañas. Se aplica a todas las fuentes, incluido `Dataset_ticket.xlsx`.
+- **Prioridad** (`ajustar_prioridad`, no sobre `tech-support`): un incidente de seguridad (acceso no autorizado, violación, brecha, malware) sube a **Alta** como mínimo; una consulta o petición de información sin incidencia con prioridad Alta o Crítica baja a **Baja**; "urgente" o una interrupción que afecta a varios sistemas con prioridad Baja sube a **Media**; la pérdida de datos sube a **Alta** como mínimo. Estas filas pasan a `origen_prioridad = regla`.
+
+Con las reglas finales, sobre una muestra nueva de 60 tickets que no se usó para ajustar: **85 % de acierto en categoría y 93 % en prioridad**.
