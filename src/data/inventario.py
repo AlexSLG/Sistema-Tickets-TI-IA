@@ -15,7 +15,7 @@ RAIZ = Path(__file__).resolve().parents[2]
 RAW = RAIZ / "data" / "raw"
 SALIDA = RAIZ / "reports" / "inventario_fuentes.md"
 
-csv.field_size_limit(sys.maxsize)
+csv.field_size_limit(2**30)
 NS = {"m": "http://schemas.openxmlformats.org/spreadsheetml/2006/main"}
 
 # Columnas de texto libre (no se resumen por valores) y columnas categóricas por archivo
