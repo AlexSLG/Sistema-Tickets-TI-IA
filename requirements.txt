@@ -1,0 +1,16 @@
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch
+pandas
+numpy
+scikit-learn
+fastapi
+uvicorn
+transformers
+sentencepiece
+sacremoses
+openpyxl
+pyarrow
+matplotlib
+pytest
+httpx
+jupyter
