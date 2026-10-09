@@ -29,6 +29,8 @@ REGLAS_CATEGORIA = {
         (r"cortafuegos|firewall|cifrad|encriptad|amenaza|incidente de seguridad|riesgo de seguridad|violacion de datos", 2),
         (r"seguridad de(l| los| las)? (dato|sistema|red|informacion|infraestructura)|proteccion de (los )?datos|proteger (los )?datos", 2),
         (r"medidas de seguridad|protocolos de seguridad|ataque", 1.5),
+        (r"no autorizad|sin autorizacion|intentos? sospechos|accesos? sospechos|violad|comprometid", 3),
+        (r"kaspersky|bitdefender|norton|mcafee|avast|\beset\b|windows defender", 3),
         (r"seguridad", 1),
     ],
     "Accesos": [
@@ -41,7 +43,8 @@ REGLAS_CATEGORIA = {
         (r"\bacceso\b", 0.75),
     ],
     "Correo": [
-        (r"outlook|buzon|bandeja de entrada|smtp|imap|pop3|\bspam\b|gmail|exchange (online|server)|cliente de correo|servidor de correo|cuenta de correo", 3.5),
+        (r"outlook", 2.5),
+        (r"buzon|bandeja de entrada|smtp|imap|pop3|\bspam\b|gmail|exchange (online|server)|cliente de correo|servidor de correo|cuenta de correo", 3.5),
         (r"(enviar|recibir|sincroniz\w+) (los |mis )?(correos|emails|mensajes de correo)|correos? (no )?(llegan|se envian|rebotan|rechazad)", 3),
         (r"adjunto|lista de distribucion|firma de correo|reglas de correo|filtro de (correo|email)", 2),
         (r"casilla|carpeta de (elementos )?(enviados|recibidos|entrada|salida)|libreta de direcciones|mensajes (recibidos|enviados)|notificacion de nuevos correos", 2.5),
@@ -55,9 +58,14 @@ REGLAS_CATEGORIA = {
     "Hardware": [
         (r"impresora|portatil|laptop|disco duro|\bssd\b|\bhdd\b|monitor|teclado|raton\b|\bmouse\b|\bram\b|\bcpu\b|procesador|ventilador|bateria|placa base|fuente de alimentacion|tarjeta grafica|\bgpu\b", 3),
         (r"sobrecalent|altavoz|webcam|camara web|proyector|escaner|auricular|microfono|cable\b|\busb\b|pantalla|hardware|ordenador|computadora|\bpc\b|equipo informatico|sala de servidores|servidor fisico", 2),
-        (r"no (se )?enciende|se apaga|encender|apagar|memoria|dispositivo|periferico|disco\b|equipo\b", 1),
+        (r"no (se )?enciende|se apaga|encender|apagar|memoria|dispositivo|periferico|disco\b", 1),
     ],
     "Software": [
+        (r"campanas? de (correo|email)|email marketing|marketing por correo", 4),
+        (r"mailchimp|sendgrid|hubspot|activecampaign", 2),
+        (r"interrupcion(es)? (inesperada |del servicio|de servicio)|tiempo de inactividad|inactividad|caida del servicio|"
+         r"(sobre)?carga del servidor|timeouts?|sincroniz\w+", 2),
+        (r"mejor\w+ (de )?(la |el )?interfaz|actualizacion de (la )?interfaz|solicitud de (mejora|funcionalidad)|nueva funcionalidad|funciones? avanzadas?", 3.5),
         (r"aplicacion|software|programa\b|actualizacion|parche|\bbug\b|sistema operativo|windows|linux|macos|instalacion|instalar|licencia|base de datos|\bsql\b|oracle|\bapi\b|integracion|plataforma|saas|navegador", 1.5),
         (r"guardar|exportar|importar|editor|\bcrm\b|\berp\b|ventanas? emergentes?|emergentes|\bpdf\b|documento|archivo|cuelga|no funciona|no responde|se congela", 1.5),
         (r"error|fallo|falla|se cierra|se bloquea|se cuelga|colapso|lento|rendimiento|configuracion|configurar|compatibilidad|caida|interrupcion|incidencia|funcionalidad", 1),
@@ -72,7 +80,7 @@ VOTOS_ETIQUETA = {
     "network": ("Red", 1.5), "hardware": ("Hardware", 1.5), "software": ("Software", 1), "bug": ("Software", 0.75),
     "crash": ("Software", 0.75), "performance": ("Software", 0.5),
 }
-DESEMPATE = ["Seguridad", "Accesos", "Correo", "Red", "Hardware", "Software"]
+DESEMPATE = ["Seguridad", "Accesos", "Correo", "Red", "Software", "Hardware"]  # en empate, lo genérico (Software) antes que Hardware
 
 
 # Menciones incidentales del correo ("envíe la información en un correo detallado") no indican la categoría Correo
@@ -115,6 +123,13 @@ NO_TI = re.compile(
     r"facturacion|reembolso|devolucion|\bfactura|precio|descuento|garantia|"
     r"estrategias? de inversion|politica de (privacidad|devoluciones)|"
     r"acuerdo de nivel de servicio|linea de tiempo de liberacion|comentarios (sobre|generales)|cuenta demo|caracteristica(s)? del producto|documentacion del producto")
+NO_TI_DURO = re.compile(
+    r"discrepancias? (en|de) (la )?facturacion|estructura de facturacion|facturas? (mucho )?mas alta|reembolso|\bprecios?\b|tarifas?|"
+    r"publicitar|publicidad|funciones del producto|vision general completa|descripcion detallada de las funciones|ofertas de soporte|"
+    r"previsiones? de inversion|equipo de seguridad|metricas de (compromiso|participacion)|"
+    r"(disminucion|caida|descenso|reduccion) (repentina |importante |notable |inesperada )?(en|del|de) (el |los |las )?(compromiso|indices de participacion|numeros de visitantes|trafico)|"
+    r"compromiso de la campana|suscripcion|seguro de (enfermedad|salud|vida)|servicios ofrecidos|"
+    r"metricas de rendimiento de (la |nuestra )?campana|caida (repentina )?en las metricas|me interesa mas detalles|ventajas de")
 # Si el texto menciona algo técnico, es de TI aunque el relato sea comercial (p. ej. "la plataforma de campañas se cayó")
 PROBLEMA = re.compile(r"servidor|plataforma|sistema|software|aplicacion|herramienta|sitio web|base de datos|\bapi\b|integracion|error|fallo|falla|"
                       r"caida|\bvpn\b|\bred\b|acceso|contrasena|correo|dispositivo|conexion|actualizacion|instalacion|configuracion|"
@@ -128,6 +143,8 @@ SENAL_TI = re.compile(
 def es_ti(titulo, descripcion, categoria_fuerte=False):
     """False si el texto es claramente comercial/administrativo y no describe un problema o petición de TI."""
     t = normalizar(f"{titulo} {descripcion}")
+    if NO_TI_DURO.search(t):
+        return False
     if categoria_fuerte:
         return True
     if NO_TI.search(t) and not PROBLEMA.search(t):
@@ -156,6 +173,44 @@ def prioridad_critica(texto, etiquetas, prioridad_base):
     fuerte = bool(CRITICA.search(t))
     etiqueta = bool(set(etiquetas) & ETIQUETAS_CRITICAS)
     return "Crítica" if fuerte or (etiqueta and CRITICA_DEBIL.search(t)) else prioridad_base
+
+
+# ------------------------------------------------------------------ ajustes de prioridad (auditoría de etiquetas)
+INCIDENTE_SEG = re.compile(r"acceso no autorizado|accesos no autorizados|no autorizad|intentos? sospechos|accesos? sospechos|violacion|violad|"
+                           r"brecha|infraccion de (los )?datos|filtracion|fuga de datos|ransomware|malware|phishing|intrusion|comprometid|"
+                           r"fallo de datos|hackeo")
+CONSULTA = re.compile(r"sirvase|solicit\w+ (una )?(mejora|informacion|orientacion|documentacion|detalles)|podria (usted )?(proporcionar|ofrecer|compartir|dar|"
+                      r"explicar)|me gustaria (saber|solicitar|preguntar|obtener|explorar)|buscando (informacion|consejos|orientacion)|consejos|"
+                      r"mejores practicas|orientacion|\bguia\b|instrucciones|documentacion|(aplicar|implementar|mejorar|reforzar) (las |los )?(medidas|protocolos|politicas)|"
+                      r"necesidad de mejorar|preguntar acerca|consulta (sobre|de)|puede (ofrecer|proporcionar)|pregunta:|interesad[oa] en|"
+                      r"es posible (obtener|proporcionar|ofrecer)|obtener (mas )?(detalles|informacion)|mas informacion|detalles sobre|"
+                      r"quisiera (saber|conocer)|entender los requisitos|asesoramiento|recomendaciones")
+INCIDENCIA = re.compile(r"error|fallo|falla|caida|caido|interrupcion|inactividad|no funciona|no puedo|bloquead|colaps|se ha producido|ha sufrido|"
+                        r"experiment\w+ (problemas|fallos|interrupciones|dificultades)|perdid|perdi |se ha identificado|se ha detectado|ha detectado|"
+                        r"se ha violado|ha comprometido|persiste|siguen existiendo|continua|bloqueo|peligro|afectad|inestable|necesitamos (ayuda|soporte)|ya hemos")
+URGENTE = re.compile(r"urgente|inmediat")
+INTERRUPCION_MULTIPLE = re.compile(r"(interrupcion|caida|inactividad|corte|fuera de servicio|apagon).{0,80}(varios|multiples|todos|sistemas|productos)|"
+                                   r"(varios|multiples|todos|sistemas|productos).{0,80}(interrupcion|caida|inactividad|corte|fuera de servicio)")
+PERDIDA_DATOS = re.compile(r"perdi (todos )?mis datos|perdida de (datos|informacion|archivos)|datos perdidos|fallo del disco duro.{0,60}datos|perdi todos")
+
+
+def ajustar_prioridad(prio, categoria, titulo, descripcion):
+    """Correcciones sistemáticas detectadas en la auditoría. Devuelve la prioridad (posiblemente igual)."""
+    t = normalizar(f"{titulo}. {descripcion}")
+    i = PRIORIDADES.index(prio)
+    es_consulta = bool(CONSULTA.search(t)) and not INCIDENCIA.search(t)
+    if categoria == "Seguridad" and INCIDENTE_SEG.search(t) and not es_consulta:
+        i = max(i, 2)  # incidente de seguridad: como mínimo Alta
+    if es_consulta and i >= 2:
+        i = 0  # una consulta o petición de información no puede ser Alta/Crítica
+    if not es_consulta:
+        if URGENTE.search(t) and i == 0:
+            i = 1
+        if INTERRUPCION_MULTIPLE.search(t) and i == 0:
+            i = 1
+        if PERDIDA_DATOS.search(t) and i < 2:
+            i = 2
+    return PRIORIDADES[i]
 
 
 # ------------------------------------------------------------------ impacto, urgencia, usuarios afectados

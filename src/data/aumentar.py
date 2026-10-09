@@ -94,7 +94,7 @@ def main():
             continue
         falta = OBJETIVO_MINIMO - n
         cand = base[(base["categoria"] == cat) & (base["descripcion"].str.split().str.len() >= 6)]
-        por_ticket = min(MAX_VARIANTES_POR_TICKET, math.ceil(falta / len(cand)))
+        por_ticket = min(MAX_VARIANTES_POR_TICKET, math.ceil(1.7 * falta / len(cand)))  # margen: parte de las variantes se descarta
         generadas = []
         for k in range(por_ticket):
             ida, vuelta = modelo(f"es-{PIVOTES[k]}"), modelo(f"{PIVOTES[k]}-es")

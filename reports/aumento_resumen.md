@@ -4,5 +4,5 @@ Retrotraducción con idioma intermedio inglés, alemán o italiano (MarianMT; id
 
 | Categoría | Reales | Candidatos | Variantes por ticket | Aumentados | Total |
 |---|---:|---:|---:|---:|---:|
-| Accesos | 384 | 384 | 1 | 216 | 600 |
-| Correo | 170 | 170 | 3 | 336 | 506 |
+| Accesos | 354 | 354 | 2 | 246 | 600 |
+| Correo | 140 | 140 | 4 | 299 | 439 |

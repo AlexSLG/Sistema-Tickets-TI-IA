@@ -14,7 +14,7 @@ import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 
 from src.data.mapeo import (CATEGORIAS, PRIORIDAD_FUENTE, asignar_impacto_urgencia, categoria_por_reglas, es_ti,
-                            normalizar, nuevo_rng, prioridad_critica, prioridad_matriz, puntaje_impacto,
+                            normalizar, nuevo_rng, ajustar_prioridad, NO_TI_DURO, prioridad_critica, prioridad_matriz, puntaje_impacto,
                             puntaje_urgencia, usuarios_afectados, IMPACTOS, URGENCIAS)
 
 RAIZ = Path(__file__).resolve().parents[2]
@@ -146,6 +146,12 @@ def etiquetar(df, rng):
         if r.fuente == "tech_support":
             cat_final, o_cat = r.categoria_fuente, "fuente"
         elif r.fuente == "dataset_ticket" and isinstance(r.categoria_fuente, str) and r.categoria_fuente:
+            if NO_TI_DURO.search(normalizar(texto)):  # p. ej. "factura de VPN más alta de lo habitual"
+                descartes["fuera_de_TI"] += 1
+                quedan.append(False)
+                cats.append(None); origen_cat.append(None); prios.append(None); origen_prio.append(None)
+                imp.append(None); urg.append(None); exc.append(False); usr.append(None)
+                continue
             cat_final, o_cat = r.categoria_fuente, "fuente"
         elif r.fuente == "dataset_ticket":  # Internal Application: peticiones de permisos y autorizaciones
             cat_final, o_cat = "Accesos", "fuente"
@@ -173,6 +179,10 @@ def etiquetar(df, rng):
             i = IMPACTOS[int(np.clip(round(puntaje_impacto(texto)), 0, 2))]
             u = URGENCIAS[int(np.clip(round(puntaje_urgencia(texto)), 0, 2))]
             base, o_prio = prioridad_matriz(i, u), "regla"
+        if r.fuente != "tech_support":  # tech-support conserva la prioridad de su fuente
+            ajustada = ajustar_prioridad(base, cat_final, r.titulo, r.descripcion)
+            if ajustada != base:
+                base, o_prio = ajustada, "regla"
 
         i, u, e = asignar_impacto_urgencia(texto, base, rng)
         cats.append(cat_final); origen_cat.append(o_cat); prios.append(base); origen_prio.append(o_prio)

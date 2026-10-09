@@ -3,14 +3,14 @@
 ## Filas por etapa
 
 - Entrada por fuente: {'multilang': 6419, 'dataset_ticket': 1800, 'v1': 812, 'tech_support': 149}
-- Descartadas por no ser de TI (sin ninguna señal técnica y con vocabulario comercial): 72
+- Descartadas por no ser de TI (sin ninguna señal técnica y con vocabulario comercial): 262
 - Depuración:
   - descripcion con menos de 3 palabras: 0
   - duplicados exactos: 35
   - casi duplicados (coseno ≥ 0.88): 49
   -   de ellos, entre fuentes distintas: 0
   -   de ellos, dentro de la misma fuente: 49
-- **Tickets resultantes (antes del aumento): 9024**
+- **Tickets resultantes (antes del aumento): 8834**
 
 ## Distribución
 
@@ -18,46 +18,46 @@
 
 | categoria   |   dataset_ticket |   multilang |   tech_support |   v1 |   All |
 |:------------|-----------------:|------------:|---------------:|-----:|------:|
-| Accesos     |               92 |         264 |              4 |   24 |   384 |
-| Correo      |              100 |          43 |              0 |   27 |   170 |
-| Hardware    |              592 |         519 |             46 |  297 |  1454 |
-| Red         |              486 |         898 |             43 |  147 |  1574 |
-| Seguridad   |              104 |        1337 |              0 |   18 |  1459 |
-| Software    |              375 |        3292 |             52 |  264 |  3983 |
-| All         |             1749 |        6353 |            145 |  777 |  9024 |
+| Accesos     |               92 |         235 |              4 |   23 |   354 |
+| Correo      |              100 |          18 |              0 |   22 |   140 |
+| Hardware    |              592 |         354 |             46 |  156 |  1148 |
+| Red         |              484 |         778 |             43 |  132 |  1437 |
+| Seguridad   |              102 |        1358 |              0 |   21 |  1481 |
+| Software    |              375 |        3492 |             52 |  355 |  4274 |
+| All         |             1745 |        6235 |            145 |  709 |  8834 |
 
 ### Prioridad
 
 | prioridad   | porcentaje   |
 |:------------|:-------------|
-| Baja        | 28.2 %       |
-| Media       | 34.4 %       |
-| Alta        | 29.5 %       |
+| Baja        | 32.1 %       |
+| Media       | 31.9 %       |
+| Alta        | 28.1 %       |
 | Crítica     | 7.9 %        |
 
 ### Prioridad × fuente
 
 | prioridad   |   dataset_ticket |   multilang |   tech_support |   v1 |   All |
 |:------------|-----------------:|------------:|---------------:|-----:|------:|
-| Alta        |               27 |        2350 |             54 |  232 |  2663 |
-| Baja        |             1390 |         981 |             22 |  153 |  2546 |
-| Crítica     |                0 |         599 |             19 |   95 |   713 |
-| Media       |              332 |        2423 |             50 |  297 |  3102 |
-| All         |             1749 |        6353 |            145 |  777 |  9024 |
+| Alta        |               34 |        2197 |             54 |  194 |  2479 |
+| Baja        |             1380 |        1297 |             22 |  141 |  2840 |
+| Crítica     |                0 |         585 |             19 |   94 |   698 |
+| Media       |              331 |        2156 |             50 |  280 |  2817 |
+| All         |             1745 |        6235 |            145 |  709 |  8834 |
 
 ### Impacto × urgencia (cuenta)
 
 | impacto   |   Alta |   Baja |   Media |
 |:----------|-------:|-------:|--------:|
-| Alto      |    753 |    818 |    1879 |
-| Bajo      |    121 |    130 |    1524 |
-| Medio     |    757 |    812 |    2230 |
+| Alto      |    717 |    713 |    1734 |
+| Bajo      |    108 |    174 |    1493 |
+| Medio     |    736 |   1085 |    2074 |
 
-Excepciones a la matriz impacto × urgencia: 6.6%
+Excepciones a la matriz impacto × urgencia: 7.0%
 
 ### Origen de la etiqueta
 
 | origen_etiqueta   |   filas |
 |:------------------|--------:|
-| regla             |    8879 |
+| regla             |    8689 |
 | fuente            |     145 |
