@@ -1,0 +1,7 @@
+titulo,descripcion,categoria_corregida,prioridad_corregida,tecnico_reasignado,impacto,urgencia,usuarios_afectados,fecha
+Mi VPN no conecta desde casa,No puedo conectarme a la VPN de la empresa desde mi casa desde esta mañana,Red,Media,T05,,,,2026-10-11
+No puedo cambiar la contraseña del correo,El portal rechaza mi contraseña nueva cuando intento cambiarla,Accesos,Media,T07,,,,2026-10-11
+La impresora atasca el papel,La impresora del piso 2 atasca el papel cada pocas hojas,Hardware,Baja,T01,,,,2026-10-11
+Recibí un correo de phishing,Me llegó un correo que imita al banco pidiendo mis credenciales,Seguridad,Alta,T06,,,,2026-10-11
+Outlook se cierra al abrir adjuntos,Outlook se cierra solo cuando abro un adjunto en PDF,Correo,Media,T07,,,,2026-10-11
+Pantalla azul tras actualizar Windows,Después de la actualización aparece una pantalla azul al iniciar,Software,Alta,T04,,,,2026-10-11
