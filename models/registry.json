@@ -1,0 +1,21 @@
+{
+  "activa": "v1",
+  "versiones": [
+    {
+      "version": "v1",
+      "fecha": "2026-10-11T13:14:45",
+      "directorio": "models/v1",
+      "metricas": {
+        "f1_macro_categoria_gru": 0.8735854183048667,
+        "f1_macro_categoria_base": 0.883920547641189,
+        "f1_macro_prioridad": 0.9318174143706943,
+        "recall_critica": 0.9433962264150944,
+        "top1_asignacion": 0.8503881439661256,
+        "similares_3_de_5": 0.8856282919488337
+      },
+      "n_correcciones": 0,
+      "estado": "publicada",
+      "nota": "Entrenamiento inicial sobre train.csv"
+    }
+  ]
+}

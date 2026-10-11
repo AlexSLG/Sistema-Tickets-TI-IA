@@ -15,3 +15,4 @@ data/processed/tickets_base.csv
 
 Dataset/
 .pytest_cache/
+*.log
