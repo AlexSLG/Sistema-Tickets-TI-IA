@@ -85,6 +85,8 @@ class Servicio:
                                                    self.aptitudes, self.tiempos))[0]
         ideal = int(np.argmax(p0))
         todos_llenos = bool((car[0] >= self.limites).all())
+        e = np.exp(p - p.max())
+        adecuacion = e / e.sum()  # softmax entre los técnicos: lectura en % del puntaje
         salida = []
         for pos, i in enumerate(orden):
             sat = bool(car[0, i] >= self.limites[i])
@@ -97,7 +99,7 @@ class Servicio:
                 nota = "Mejor opción con capacidad disponible."
             salida.append({"id_tecnico": self.ids[i], "nombre": self.tecnicos.iloc[i]["nombre"], "area": self.tecnicos.iloc[i]["area"],
                            "aptitud": int(self.aptitudes[i, cat_idx]), "carga": int(car[0, i]), "limite_carga": int(self.limites[i]),
-                           "saturado": sat, "puntaje": float(p[i]), "recomendado": pos == 0, "nota": nota})
+                           "saturado": sat, "puntaje": float(p[i]), "adecuacion": float(adecuacion[i]), "recomendado": pos == 0, "nota": nota})
         return salida
 
     def analizar(self, titulo, descripcion, impacto, urgencia, usuarios_afectados):

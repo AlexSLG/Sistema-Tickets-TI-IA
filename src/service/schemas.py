@@ -36,6 +36,7 @@ class TecnicoSalida(BaseModel):
     limite_carga: int
     saturado: bool
     puntaje: float
+    adecuacion: float
     recomendado: bool
     nota: Optional[str] = None
 

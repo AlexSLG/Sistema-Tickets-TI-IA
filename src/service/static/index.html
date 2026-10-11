@@ -1,1 +1,108 @@
-<!doctype html><title>pruebas</title><p>placeholder</p>
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Laboratorio de modelos · Tickets TI</title>
+<link rel="stylesheet" href="/estatico/estilo.css">
+</head>
+<body>
+<header class="barra">
+  <div class="marca"><span class="logo" aria-hidden="true">◈</span><div><strong>Laboratorio de modelos</strong><small>Sistema de tickets TI con IA · Sprint 1 · página de prueba</small></div></div>
+  <div class="estado" id="estado-modelo" title="Versión activa de los modelos">Conectando…</div>
+</header>
+
+<nav class="pestanas" role="tablist" aria-label="Secciones">
+  <button role="tab" aria-selected="true" aria-controls="p-analizar" id="t-analizar" class="activa">1 · Analizar ticket</button>
+  <button role="tab" aria-selected="false" aria-controls="p-balanceo" id="t-balanceo">2 · Balanceo de carga</button>
+  <button role="tab" aria-selected="false" aria-controls="p-metricas" id="t-metricas">3 · Métricas</button>
+  <button role="tab" aria-selected="false" aria-controls="p-continuo" id="t-continuo">4 · Aprendizaje continuo</button>
+</nav>
+
+<main>
+<!-- 1 · ANALIZAR -->
+<section id="p-analizar" role="tabpanel" class="panel visible">
+  <div class="rejilla dos">
+    <form id="form-analizar" class="tarjeta" autocomplete="off">
+      <h2>Ticket</h2>
+      <div class="ejemplos"><span>Ejemplos:</span><span id="ejemplos"></span></div>
+      <label>Título<input id="titulo" required minlength="3" maxlength="200" placeholder="Ej.: No puedo conectarme a la VPN"></label>
+      <label>Descripción<textarea id="descripcion" rows="5" required minlength="3" maxlength="5000" placeholder="Describe el problema con tus palabras…"></textarea></label>
+      <div class="fila3">
+        <label>Impacto<select id="impacto"><option>Bajo</option><option selected>Medio</option><option>Alto</option></select></label>
+        <label>Urgencia<select id="urgencia"><option>Baja</option><option selected>Media</option><option>Alta</option></select></label>
+        <label>Usuarios afectados<input id="usuarios" type="number" min="1" max="100000" value="1"></label>
+      </div>
+      <button class="primario" type="submit" id="btn-analizar">Analizar ticket</button>
+      <p class="ayuda">La prioridad depende de impacto y urgencia (matriz impacto × urgencia); la categoría se obtiene del texto.</p>
+    </form>
+
+    <div id="resultado" class="tarjeta vacio">
+      <h2>Resultado</h2>
+      <p class="ayuda">Escribe un ticket o elige un ejemplo y pulsa «Analizar».</p>
+    </div>
+  </div>
+</section>
+
+<!-- 2 · BALANCEO -->
+<section id="p-balanceo" role="tabpanel" class="panel" hidden>
+  <div class="rejilla dos">
+    <div class="tarjeta">
+      <h2>Carga de los técnicos</h2>
+      <p class="ayuda">Edita las cargas (tickets abiertos) para saturar a un técnico y mira cómo cambia la asignación. Un técnico está <strong>saturado</strong> cuando su carga alcanza su límite.</p>
+      <table class="tabla" id="tabla-cargas"><thead><tr><th>Técnico</th><th>Área</th><th>Límite</th><th>Carga</th><th>Ocupación</th></tr></thead><tbody></tbody></table>
+      <div class="botones">
+        <button class="primario" id="btn-aplicar-cargas">Aplicar cargas</button>
+        <button id="btn-reset-cargas">Restablecer (40 %)</button>
+        <button id="btn-saturar">Saturar al recomendado</button>
+      </div>
+      <div id="msg-cargas" class="mensaje" role="status"></div>
+    </div>
+    <div class="tarjeta">
+      <h2>Asignación para un ticket de prueba</h2>
+      <label>Ticket de prueba<select id="sel-ejemplo-balanceo"></select></label>
+      <button id="btn-asignar" class="primario">Calcular asignación</button>
+      <div id="resultado-balanceo" class="ayuda">Aún no se ha calculado.</div>
+    </div>
+  </div>
+</section>
+
+<!-- 3 · METRICAS -->
+<section id="p-metricas" role="tabpanel" class="panel" hidden>
+  <div id="contenido-metricas" class="tarjeta"><p class="ayuda">Cargando métricas…</p></div>
+</section>
+
+<!-- 4 · CONTINUO -->
+<section id="p-continuo" role="tabpanel" class="panel" hidden>
+  <div class="rejilla dos">
+    <form id="form-correccion" class="tarjeta" autocomplete="off">
+      <h2>Registrar una corrección</h2>
+      <p class="ayuda">Si la IA se equivocó, indica la categoría o prioridad correcta. Las correcciones se usan al reentrenar.</p>
+      <label>Título<input id="c-titulo" required minlength="3"></label>
+      <label>Descripción<textarea id="c-descripcion" rows="3" required minlength="3"></textarea></label>
+      <div class="fila3">
+        <label>Categoría correcta<select id="c-categoria"></select></label>
+        <label>Prioridad correcta<select id="c-prioridad"></select></label>
+        <label>Técnico reasignado<select id="c-tecnico"><option value="">(sin cambio)</option></select></label>
+      </div>
+      <button class="primario" type="submit">Guardar corrección</button>
+      <div id="msg-correccion" class="mensaje" role="status"></div>
+      <h3>Correcciones guardadas <span id="n-correcciones" class="insignia">0</span></h3>
+      <div id="lista-correcciones" class="ayuda"></div>
+    </form>
+    <div class="tarjeta">
+      <h2>Reentrenamiento</h2>
+      <p class="ayuda">Reentrena desde la versión vigente con las correcciones y la compara en un conjunto de referencia fijo. <strong>Solo se publica si su F1 macro iguala o supera al de la vigente.</strong> Tarda unos minutos.</p>
+      <div class="fila2"><label>Épocas máximas<input id="r-epocas" type="number" min="1" max="30" value="3"></label><button class="primario" id="btn-reentrenar">Reentrenar</button></div>
+      <div id="estado-reentrenamiento" class="mensaje" role="status"></div>
+      <div id="comparacion"></div>
+      <h3>Versiones de los modelos</h3>
+      <table class="tabla" id="tabla-versiones"><thead><tr><th>Versión</th><th>Estado</th><th>F1 macro (categoría)</th><th>Correcciones</th><th>Nota</th><th></th></tr></thead><tbody></tbody></table>
+    </div>
+  </div>
+</section>
+</main>
+<footer class="pie">Página de demostración de los modelos del Sprint 1; no es el producto final. Documentación de la API en <a href="/docs">/docs</a>.</footer>
+<script src="/estatico/app.js"></script>
+</body>
+</html>
