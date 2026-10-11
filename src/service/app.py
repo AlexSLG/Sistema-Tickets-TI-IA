@@ -50,6 +50,16 @@ def recargar(version=None):
         estado["servicio"] = nuevo
 
 
+@app.middleware("http")
+async def sin_cache_para_la_pagina(request, call_next):
+    """La página y sus recursos no se guardan en caché: así los cambios de estilo se ven al recargar."""
+    respuesta = await call_next(request)
+    ruta = request.url.path
+    if ruta in ("/", "/laboratorio") or ruta.startswith("/estatico/"):
+        respuesta.headers["Cache-Control"] = "no-store"
+    return respuesta
+
+
 @app.on_event("startup")
 def al_iniciar():
     try:
