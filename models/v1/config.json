@@ -1,0 +1,10 @@
+{
+  "umbral_solucion_rapida": 0.7,
+  "version": "v1",
+  "max_len": 128,
+  "gru": {
+    "dim_emb": 128,
+    "dim_oculta": 128,
+    "capas": 2
+  }
+}

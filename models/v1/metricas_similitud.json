@@ -1,0 +1,87 @@
+{
+  "casos_similares": {
+    "val_reales": 1329,
+    "criterio_3_de_5_misma_categoria": 0.8946576373212942,
+    "precision_en_5": 0.8945071482317531,
+    "muestra_30": {
+      "criterio_3_de_5": 0.8666666666666667,
+      "precision_en_5": 0.8666666666666667
+    },
+    "referencia_tfidf": {
+      "criterio_3_de_5": 0.8164033107599699,
+      "precision_en_5": 0.7581640331075997
+    }
+  },
+  "soluciones_rapidas": {
+    "frases": 203,
+    "textos_indexados": 253,
+    "entradas": 50,
+    "peso_tfidf": 0.7,
+    "umbral": 0.7,
+    "leave_one_phrase_out": {
+      "exactitud_top1": 0.43842364532019706,
+      "curva_umbral": [
+        {
+          "umbral": 0.4,
+          "cobertura": 0.8226600985221675,
+          "precision": 0.49101796407185627
+        },
+        {
+          "umbral": 0.45,
+          "cobertura": 0.7192118226600985,
+          "precision": 0.5136986301369864
+        },
+        {
+          "umbral": 0.5,
+          "cobertura": 0.5024630541871922,
+          "precision": 0.5588235294117647
+        },
+        {
+          "umbral": 0.55,
+          "cobertura": 0.3842364532019704,
+          "precision": 0.6153846153846154
+        },
+        {
+          "umbral": 0.6,
+          "cobertura": 0.24630541871921183,
+          "precision": 0.68
+        },
+        {
+          "umbral": 0.65,
+          "cobertura": 0.16748768472906403,
+          "precision": 0.7352941176470589
+        },
+        {
+          "umbral": 0.7,
+          "cobertura": 0.11330049261083744,
+          "precision": 0.8695652173913043
+        },
+        {
+          "umbral": 0.75,
+          "cobertura": 0.07389162561576355,
+          "precision": 1.0
+        },
+        {
+          "umbral": 0.8,
+          "cobertura": 0.06403940886699508,
+          "precision": 1.0
+        },
+        {
+          "umbral": 0.85,
+          "cobertura": 0.04926108374384237,
+          "precision": 1.0
+        },
+        {
+          "umbral": 0.9,
+          "cobertura": 0.024630541871921183,
+          "precision": 1.0
+        }
+      ]
+    },
+    "val": {
+      "consultas": 1329,
+      "fraccion_que_dispara": 0.0030097817908201654,
+      "categoria_coincide_cuando_dispara": 1.0
+    }
+  }
+}
