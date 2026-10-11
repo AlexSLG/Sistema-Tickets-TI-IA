@@ -10,3 +10,8 @@ models/*/
 .env
 .venv-traduccion/
 data/processed/tickets_base.csv
+
+.pytest_cache/
+
+Dataset/
+.pytest_cache/
