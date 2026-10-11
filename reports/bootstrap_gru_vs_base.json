@@ -1,0 +1,20 @@
+{
+ "n": 1331,
+ "gru_f1_macro": 0.8837,
+ "gru_IC95": [
+  0.8534,
+  0.9071
+ ],
+ "base_f1_macro": 0.8839,
+ "base_IC95": [
+  0.8523,
+  0.9081
+ ],
+ "diferencia_gru_menos_base": -0.0002,
+ "diferencia_IC95": [
+  -0.0137,
+  0.0152
+ ],
+ "prob_gru_mejor": 0.479,
+ "acuerdo_gru_base": 0.932
+}

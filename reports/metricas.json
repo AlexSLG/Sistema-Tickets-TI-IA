@@ -1,0 +1,268 @@
+{
+  "version": "v1",
+  "evaluado_sobre": "test.csv, solo tickets reales",
+  "criterios": {
+    "gru_f1_macro_ge_0.85": {
+      "valor": 0.8836838015528885,
+      "cumple": true
+    },
+    "gru_mejor_que_base": {
+      "valor": -0.00023674608830048793,
+      "cumple": false
+    },
+    "mlp_prioridad_f1_macro_ge_0.80": {
+      "valor": 0.9230390561342426,
+      "cumple": true
+    },
+    "mlp_prioridad_recall_critica_ge_0.85": {
+      "valor": 0.9528301886792453,
+      "cumple": true
+    },
+    "asignacion_top1_ge_0.80": {
+      "valor": 0.8503881439661256,
+      "cumple": true
+    },
+    "balanceo_sin_violaciones_de_limite": {
+      "valor": 0,
+      "cumple": true
+    },
+    "similares_3_de_5_misma_categoria_muestra_30": {
+      "valor": 0.8666666666666667,
+      "cumple": true
+    }
+  },
+  "categoria": {
+    "gru": {
+      "f1_macro": 0.8836838015528885,
+      "exactitud": 0.9008264462809917,
+      "por_clase": {
+        "Hardware": {
+          "precision": 0.88,
+          "recall": 0.8850574712643678,
+          "f1": 0.8825214899713467,
+          "soporte": 174
+        },
+        "Software": {
+          "precision": 0.9239302694136292,
+          "recall": 0.9066874027993779,
+          "f1": 0.9152276295133438,
+          "soporte": 643
+        },
+        "Red": {
+          "precision": 0.8450704225352113,
+          "recall": 0.8333333333333334,
+          "f1": 0.8391608391608392,
+          "soporte": 216
+        },
+        "Accesos": {
+          "precision": 0.7761194029850746,
+          "recall": 0.9629629629629629,
+          "f1": 0.859504132231405,
+          "soporte": 54
+        },
+        "Correo": {
+          "precision": 0.8571428571428571,
+          "recall": 0.8571428571428571,
+          "f1": 0.8571428571428571,
+          "soporte": 21
+        },
+        "Seguridad": {
+          "precision": 0.9464285714285714,
+          "recall": 0.9506726457399103,
+          "f1": 0.9485458612975392,
+          "soporte": 223
+        }
+      }
+    },
+    "base": {
+      "f1_macro": 0.883920547641189,
+      "exactitud": 0.9068369646882044,
+      "por_clase": {
+        "Hardware": {
+          "precision": 0.9017341040462428,
+          "recall": 0.896551724137931,
+          "f1": 0.899135446685879,
+          "soporte": 174
+        },
+        "Software": {
+          "precision": 0.9329073482428115,
+          "recall": 0.9082426127527217,
+          "f1": 0.9204097714736013,
+          "soporte": 643
+        },
+        "Red": {
+          "precision": 0.8317757009345794,
+          "recall": 0.8240740740740741,
+          "f1": 0.827906976744186,
+          "soporte": 216
+        },
+        "Accesos": {
+          "precision": 0.7536231884057971,
+          "recall": 0.9629629629629629,
+          "f1": 0.8455284552845529,
+          "soporte": 54
+        },
+        "Correo": {
+          "precision": 0.8181818181818182,
+          "recall": 0.8571428571428571,
+          "f1": 0.8372093023255814,
+          "soporte": 21
+        },
+        "Seguridad": {
+          "precision": 0.9647577092511013,
+          "recall": 0.9820627802690582,
+          "f1": 0.9733333333333334,
+          "soporte": 223
+        }
+      }
+    },
+    "por_fuente_gru": {
+      "dataset_ticket": {
+        "n": 264,
+        "exactitud": 0.9734848484848485,
+        "f1_macro": 0.9707014903472414
+      },
+      "multilang": {
+        "n": 933,
+        "exactitud": 0.8863879957127545,
+        "f1_macro": 0.7988204704045367
+      },
+      "tech_support": {
+        "n": 31,
+        "exactitud": 0.8387096774193549,
+        "f1_macro": 0.5854030501089325
+      },
+      "v1": {
+        "n": 103,
+        "exactitud": 0.8640776699029126,
+        "f1_macro": 0.6972161501864472
+      }
+    },
+    "por_fuente_base": {
+      "dataset_ticket": {
+        "n": 264,
+        "exactitud": 0.9696969696969697,
+        "f1_macro": 0.9622587810525522
+      },
+      "multilang": {
+        "n": 933,
+        "exactitud": 0.8928188638799571,
+        "f1_macro": 0.778943895621886
+      },
+      "tech_support": {
+        "n": 31,
+        "exactitud": 0.9354838709677419,
+        "f1_macro": 0.6342019263845889
+      },
+      "v1": {
+        "n": 103,
+        "exactitud": 0.8640776699029126,
+        "f1_macro": 0.7105841018884497
+      }
+    }
+  },
+  "prioridad": {
+    "regla: matriz impacto × urgencia": {
+      "f1_macro": 0.9312352073102348,
+      "exactitud": 0.9338842975206612,
+      "recall_critica": 0.9433962264150944
+    },
+    "base: TF-IDF + LR (solo texto)": {
+      "f1_macro": 0.6380910211427828,
+      "exactitud": 0.6453794139744553,
+      "recall_critica": 0.6037735849056604
+    },
+    "mlp completo": {
+      "f1_macro": 0.9230390561342426,
+      "exactitud": 0.9263711495116453,
+      "recall_critica": 0.9528301886792453
+    },
+    "mlp completo (categoría predicha)": {
+      "f1_macro": 0.9230390561342426,
+      "exactitud": 0.9263711495116453,
+      "recall_critica": 0.9528301886792453
+    },
+    "mlp sin impacto/urgencia (texto)": {
+      "f1_macro": 0.5818005334490844,
+      "exactitud": 0.6010518407212622,
+      "recall_critica": 0.6226415094339622
+    },
+    "mlp sin embedding (tabular)": {
+      "f1_macro": 0.9312352073102348,
+      "exactitud": 0.9338842975206612,
+      "recall_critica": 0.9433962264150944
+    }
+  },
+  "prioridad_por_clase_mlp": {
+    "Baja": {
+      "precision": 0.9429928741092637,
+      "recall": 0.9297423887587822,
+      "f1": 0.9363207547169812,
+      "soporte": 427
+    },
+    "Media": {
+      "precision": 0.908235294117647,
+      "recall": 0.910377358490566,
+      "f1": 0.9093050647820966,
+      "soporte": 424
+    },
+    "Alta": {
+      "precision": 0.9483695652173914,
+      "recall": 0.9331550802139037,
+      "f1": 0.9407008086253369,
+      "soporte": 374
+    },
+    "Crítica": {
+      "precision": 0.8632478632478633,
+      "recall": 0.9528301886792453,
+      "f1": 0.905829596412556,
+      "soporte": 106
+    }
+  },
+  "asignacion": {
+    "n_test": 1417,
+    "top1": 0.8503881439661256,
+    "top3": 0.9872971065631616,
+    "top1_con_balanceo": 0.8546224417784051,
+    "referencia_mas_apto_sin_carga": 0.39096683133380383,
+    "violaciones_de_limite_con_balanceo": 0,
+    "violaciones_de_limite_sin_balanceo": 2,
+    "casos_con_todos_saturados": 78,
+    "top1_por_categoria": {
+      "Hardware": 0.9137931034482759,
+      "Software": 0.7682737169517885,
+      "Red": 0.9027777777777778,
+      "Accesos": 0.945054945054945,
+      "Correo": 0.9428571428571428,
+      "Seguridad": 0.9192825112107623
+    }
+  },
+  "similitud": {
+    "casos_similares": {
+      "val_reales": 1329,
+      "criterio_3_de_5_misma_categoria": 0.8946576373212942,
+      "precision_en_5": 0.8945071482317531,
+      "muestra_30": {
+        "criterio_3_de_5": 0.8666666666666667,
+        "precision_en_5": 0.8666666666666667
+      },
+      "referencia_tfidf": {
+        "criterio_3_de_5": 0.8164033107599699,
+        "precision_en_5": 0.7581640331075997
+      }
+    },
+    "soluciones_rapidas": {
+      "frases": 203,
+      "textos_indexados": 253,
+      "entradas": 50,
+      "peso_tfidf": 0.7,
+      "umbral": 0.7,
+      "val": {
+        "consultas": 1329,
+        "fraccion_que_dispara": 0.0030097817908201654,
+        "categoria_coincide_cuando_dispara": 1.0
+      },
+      "leave_one_out_top1": 0.43842364532019706
+    }
+  }
+}

@@ -24,8 +24,23 @@ Proyecto académico (Scrum + CRISP-ML(Q)). Equipo: Alex (Scrum Master), Jeferson
 | 4 · Mapeo, depuración y unificación (+ auditoría de etiquetas) | ✅ `reports/reglas_etiquetado.md`, `reports/auditoria_etiquetas.md` |
 | 5 · EDA y división 70/15/15 por grupo | ✅ `reports/eda.md`, `reports/division_resumen.md`, `notebooks/01_eda.ipynb` |
 | 6 · Técnicos, historial de asignaciones y soluciones rápidas | ✅ `reports/datos_auxiliares.md` |
-| 7 · Modelos (base, GRU, MLP de prioridad, asignación, similitud) | ⏳ pendiente |
-| 8–12 · Reentrenamiento, API de inferencia, página de prueba, diseño del Sprint 2, evaluación final | ⏳ pendiente |
+| 7 · Modelos (base, GRU, MLP de prioridad, asignación, similitud) | ✅ `reports/informe_modelos.md` |
+| 8 · Reentrenamiento con correcciones y `models/registry.json` | ✅ `reports/prueba_reentrenamiento.md` |
+| 9 · API de inferencia (FastAPI) con pruebas | ✅ `docs/contrato_api.md` |
+| 10 · Página web de prueba (4 pestañas) | ✅ `src/service/static/` |
+| 11 · Diseño para el Sprint 2 | ✅ `docs/modelo_datos.md`, `docs/contrato_api.md` |
+| 12 · Evaluación final | ✅ `reports/informe_modelos.md`, `reports/metricas.json` |
+
+### Resultados de los modelos (test, tickets reales)
+
+| Modelo | Resultado | Criterio |
+|---|---|---|
+| GRU de categoría | F1 macro **0,884** (modelo base TF-IDF + regresión logística: 0,884; empate estadístico) | ≥ 0,85 ✅ · mejor que el base ❌ |
+| MLP de prioridad | F1 macro **0,923**, recall de Crítica **0,953** (la regla impacto × urgencia da 0,931) | ≥ 0,80 y ≥ 0,85 ✅ |
+| MLP de asignación | técnico esperado en primer lugar **85,0 %**; 0 violaciones del límite de carga | ≥ 80 % ✅ |
+| Casos similares | ≥ 3 de 5 de la misma categoría en el **87 %** (muestra de 30) y 89,5 % (validación) | ✅ |
+
+El MLP de prioridad depende casi por completo de impacto y urgencia; sin ellas el F1 cae a 0,58. Las soluciones rápidas son un detector conservador. Detalle y limitaciones en `reports/informe_modelos.md`.
 
 El plan detallado está en `PLAN_SPRINT1.md`.
 
@@ -108,7 +123,25 @@ Pruebas de los datos:
 .venv\Scripts\python -m pytest tests/ -q
 ```
 
-Entrenar los modelos, levantar la API de inferencia y abrir la página de prueba se documentará aquí al terminar los pasos 7 a 10.
+## Entrenar, evaluar y levantar el servicio
+
+Los modelos entrenados (`models/v1/`, ≈ 23 MB) **no están en el repositorio**; hay que entrenarlos una vez (del orden de una hora en CPU, casi todo la GRU):
+
+```bash
+.venv\Scripts\python -m src.training.entrenar_todo --version v1   # base, GRU, MLP de prioridad, asignación, similitud; registra v1 en models/registry.json
+.venv\Scripts\python -m src.training.evaluar                       # reports/metricas.json y figuras
+.venv\Scripts\python -m pytest tests/ -q                           # 25 pruebas (datos, API, balanceo, registro)
+.venv\Scripts\python -m uvicorn src.service.app:app --port 8000    # API en /docs y página de prueba en http://localhost:8000
+```
+
+Pasos sueltos: `entrenar_clasificador`, `entrenar_prioridad`, `entrenar_asignacion` y `entrenar_similitud` (`python -m src.training.<nombre>`). Aprendizaje continuo: se guardan correcciones desde la página (pestaña 4) o con `POST /api/correcciones`, y `python -m src.training.reentrenar` (o el botón de la página) reentrena y publica la versión nueva solo si su F1 macro iguala o supera al de la vigente.
+
+Con Docker (necesita los modelos ya entrenados; el `Dockerfile` no se ha probado todavía en este equipo):
+
+```bash
+docker build -t tickets-ti-ia .
+docker run --rm -p 8000:8000 tickets-ti-ia
+```
 
 ## Estructura
 
@@ -119,11 +152,12 @@ data/interim/         por fuente: filtrado, traducido, caché de traducción (no
 data/processed/       tickets.csv, train/val/test.csv, tecnicos.csv, historial_asignaciones.csv, soluciones_rapidas.json
 notebooks/            01_eda.ipynb
 src/data/             inventario, filtrar, traduccion, mapeo, unificar, aumentar, auditoria, dividir, eda, auxiliares, soluciones_rapidas
-src/models/           (paso 7) gru_clasificador, mlp_prioridad, mlp_asignacion, similitud
-src/training/         (pasos 7–8) entrenar_*, evaluar, reentrenar, registro
-src/service/          (pasos 9–10) API FastAPI y página de prueba
-models/               artefactos por versión y registry.json
-reports/              inventario, reglas, auditoría, EDA, calidad de traducción y, más adelante, métricas
+src/models/           comun, base, gru_clasificador, mlp_prioridad, mlp_asignacion, similitud
+src/training/         entrenar_*, entrenar_todo, evaluar, reentrenar, registro
+src/service/          API FastAPI (app, inferencia, schemas) y página de prueba (static/)
+models/               artefactos por versión (no versionados) y registry.json
+docs/                 modelo_datos.md (ER en Mermaid) y contrato_api.md
+reports/              inventario, reglas, auditoría, EDA, calidad de traducción, informe de modelos y métricas
 tests/                pruebas con pytest
 ```
 

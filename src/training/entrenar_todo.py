@@ -29,7 +29,9 @@ def entrenar_todo(version, reutilizar_gru=False, epocas=40, nota="", activar=Tru
     entrenar_similitud.construir_y_evaluar(d, train, val, soluciones)
     cfg_ruta = d / "config.json"
     cfg = json.loads(cfg_ruta.read_text(encoding="utf-8")) if cfg_ruta.exists() else {}
-    cfg.update({"version": version, "max_len": 128, "gru": {k: kw_gru.get(k) for k in ("dim_emb", "dim_oculta", "capas")}})
+    import torch
+    ck = torch.load(d / "gru.pt", map_location="cpu")
+    cfg.update({"version": version, "max_len": 128, "gru": {"dim_emb": ck["dim_emb"], "dim_oculta": ck["dim_oculta"], "capas": ck["capas"]}})
     guardar_json(cfg, cfg_ruta)
     m = registro.resumen_metricas(d)
     registro.registrar(version, m, 0, "publicada", nota, activar=activar)

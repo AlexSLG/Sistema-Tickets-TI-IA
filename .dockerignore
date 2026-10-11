@@ -1,0 +1,16 @@
+.venv/
+.venv-traduccion/
+.git/
+Dataset/
+data/raw/
+data/interim/
+data/processed/tickets*.csv
+data/processed/train.csv
+data/processed/val.csv
+data/processed/test.csv
+data/processed/historial_asignaciones.csv
+notebooks/
+tests/
+__pycache__/
+*.log
+.pytest_cache/

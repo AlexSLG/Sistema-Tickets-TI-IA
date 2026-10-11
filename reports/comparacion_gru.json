@@ -1,0 +1,29 @@
+{
+  "criterio_de_eleccion": "F1 macro en validación (tickets reales); el test no se usa para elegir",
+  "variantes": [
+    {
+      "nombre": "GRU bidireccional 1 capa, embedding 128, oculta 128",
+      "epocas_entrenadas": 23,
+      "mejor_f1_macro_val": 0.8508692022556993,
+      "f1_macro_test_reales": 0.8735854183048667,
+      "f1_macro_test_todos": 0.8861123704291395,
+      "base_f1_macro_test_reales": 0.883920547641189
+    },
+    {
+      "nombre": "GRU bidireccional 1 capa, embedding 200, oculta 128",
+      "epocas_entrenadas": 11,
+      "mejor_f1_macro_val": 0.8462,
+      "f1_macro_test_reales": 0.8656,
+      "nota": "descartada: no mejora en validación"
+    },
+    {
+      "nombre": "GRU bidireccional 2 capas, embedding 128, oculta 128",
+      "epocas_entrenadas": 26,
+      "mejor_f1_macro_val": 0.8673339264277358,
+      "f1_macro_test_reales": 0.8836838015528885,
+      "f1_macro_test_todos": 0.8894384362324698,
+      "base_f1_macro_test_reales": 0.883920547641189,
+      "nota": "ELEGIDA: mejor F1 macro de validación"
+    }
+  ]
+}
