@@ -16,6 +16,22 @@
       "n_correcciones": 0,
       "estado": "publicada",
       "nota": "Entrenamiento inicial sobre train.csv (GRU de 2 capas, elegida por F1 de validación)"
+    },
+    {
+      "version": "v2",
+      "fecha": "2026-10-11T18:38:55",
+      "directorio": "models/v2",
+      "metricas": {
+        "f1_macro_categoria_gru": 0.8858578275159524,
+        "f1_macro_categoria_base": 0.891331693648033,
+        "f1_macro_prioridad": 0.9267733789469933,
+        "recall_critica": 0.9433962264150944,
+        "top1_asignacion": 0.8602681721947777,
+        "similares_3_de_5": 0.8931527464258842
+      },
+      "n_correcciones": 1,
+      "estado": "publicada",
+      "nota": "Reentrenada desde v1 con 1 correcciones."
     }
   ]
 }

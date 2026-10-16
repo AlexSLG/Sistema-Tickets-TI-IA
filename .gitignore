@@ -12,3 +12,4 @@ data/interim/
 data/processed/tickets_base.csv
 data/correcciones.csv
 Dataset/
+models/v2/
