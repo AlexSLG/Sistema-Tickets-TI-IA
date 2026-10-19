@@ -40,3 +40,60 @@ def test_semilla_crea_usuarios_y_tecnicos():
         assert verificar_contrasena("Admin123", admin.contrasena_hash) and not verificar_contrasena("otra", admin.contrasena_hash)
         assert not semilla.bd_vacia(s)
         assert any(u.correo == "marcela.vega@soporte.local" for u in usuarios)
+
+
+# ------------------------------------------------------------------ fase 2: login, roles, usuarios
+ADMIN = ("admin@soporte.local", "Admin123")
+ANA = ("ana.torres@empresa.local", "Usuario123")
+MARCELA = ("marcela.vega@soporte.local", "Soporte123")
+
+
+def entrar(cliente, cred):
+    r = cliente.post("/api/auth/login", json={"correo": cred[0], "contrasena": cred[1]})
+    assert r.status_code == 200, r.text
+    return {"Authorization": f"Bearer {r.json()['token']}"}
+
+
+def test_login_correcto_e_incorrecto(cliente):
+    r = cliente.post("/api/auth/login", json={"correo": ANA[0], "contrasena": ANA[1]})
+    assert r.status_code == 200 and r.json()["usuario"]["rol"] == "Usuario" and r.json()["token"]
+    assert cliente.post("/api/auth/login", json={"correo": ANA[0], "contrasena": "mala"}).status_code == 401
+    assert cliente.post("/api/auth/login", json={"correo": "nadie@x.com", "contrasena": "x"}).status_code == 401
+    soporte = cliente.post("/api/auth/login", json={"correo": MARCELA[0], "contrasena": MARCELA[1]}).json()["usuario"]
+    assert soporte["rol"] == "Soporte" and soporte["tecnico_id"] == "T05"
+
+
+def test_sin_token_401_y_token_invalido(cliente):
+    assert cliente.get("/api/auth/yo").status_code == 401
+    assert cliente.get("/api/auth/yo", headers={"Authorization": "Bearer basura"}).status_code == 401
+    assert cliente.get("/api/auth/yo", headers=entrar(cliente, ANA)).json()["correo"] == ANA[0]
+
+
+def test_usuario_no_entra_a_rutas_de_administrador(cliente):
+    h = entrar(cliente, ANA)
+    assert cliente.get("/api/usuarios", headers=h).status_code == 403
+    assert cliente.post("/api/usuarios", headers=h, json={"nombre": "X Y", "correo": "x@y.com", "contrasena": "123456", "rol": "Administrador"}).status_code == 403
+    assert cliente.get("/api/usuarios", headers=entrar(cliente, MARCELA)).status_code == 403
+    assert len(cliente.get("/api/usuarios", headers=entrar(cliente, ADMIN)).json()) == 12
+
+
+def test_administrador_gestiona_usuarios(cliente):
+    h = entrar(cliente, ADMIN)
+    r = cliente.post("/api/usuarios", headers=h, json={"nombre": "Pedro Gil", "correo": "Pedro.Gil@empresa.local", "contrasena": "Clave123", "rol": "Usuario"})
+    assert r.status_code == 201 and r.json()["correo"] == "pedro.gil@empresa.local"
+    assert cliente.post("/api/usuarios", headers=h, json={"nombre": "Pedro Gil", "correo": "pedro.gil@empresa.local", "contrasena": "Clave123"}).status_code == 422
+    assert cliente.post("/api/usuarios", headers=h, json={"nombre": "Pedro", "correo": "no-es-correo", "contrasena": "Clave123"}).status_code == 422
+    uid = r.json()["id"]
+    entrar(cliente, ("pedro.gil@empresa.local", "Clave123"))
+    assert cliente.put(f"/api/usuarios/{uid}", headers=h, json={"activo": False}).json()["activo"] is False
+    assert cliente.post("/api/auth/login", json={"correo": "pedro.gil@empresa.local", "contrasena": "Clave123"}).status_code == 401
+    cliente.put(f"/api/usuarios/{uid}", headers=h, json={"activo": True, "rol": "Soporte", "contrasena": "Nueva1234"})
+    assert entrar(cliente, ("pedro.gil@empresa.local", "Nueva1234"))
+    assert cliente.put("/api/usuarios/no-existe", headers=h, json={"activo": False}).status_code == 404
+
+
+def test_administrador_no_puede_quitarse_el_rol(cliente):
+    h = entrar(cliente, ADMIN)
+    yo = cliente.get("/api/auth/yo", headers=h).json()
+    assert cliente.put(f"/api/usuarios/{yo['id']}", headers=h, json={"rol": "Usuario"}).status_code == 422
+    assert cliente.put(f"/api/usuarios/{yo['id']}", headers=h, json={"activo": False}).status_code == 422

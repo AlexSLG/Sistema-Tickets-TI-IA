@@ -75,6 +75,13 @@ def al_iniciar():
                 semilla.sembrar(sesion)
 
 
+# ------------------------------------------------------------------ sistema de tickets (Sprint 2)
+from src.sistema.rutas import auth as _auth, usuarios as _usuarios  # noqa: E402
+
+app.include_router(_auth.router)
+app.include_router(_usuarios.router)
+
+
 # ------------------------------------------------------------------ inferencia
 @app.post("/api/analizar", response_model=AnalisisSalida, tags=["inferencia"], summary="Analizar un ticket")
 def analizar(t: TicketEntrada):
