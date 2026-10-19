@@ -66,6 +66,13 @@ def al_iniciar():
         servicio()
     except HTTPException:
         pass  # se informará con 503 en cada petición hasta que haya modelos
+    # Sistema de tickets: crea las tablas y, si la BD está vacía, carga los datos de demostración
+    from src.sistema import config, db as bd, semilla
+    bd.iniciar()
+    if config.semilla_automatica():
+        with bd.SessionLocal() as sesion:
+            if semilla.bd_vacia(sesion):
+                semilla.sembrar(sesion)
 
 
 # ------------------------------------------------------------------ inferencia

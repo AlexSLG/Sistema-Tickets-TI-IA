@@ -15,3 +15,7 @@ pytest
 httpx
 jupyter
 tabulate
+sqlalchemy
+psycopg[binary]
+pyjwt
+bcrypt

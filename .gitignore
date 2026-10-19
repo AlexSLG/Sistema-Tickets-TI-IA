@@ -13,3 +13,5 @@ data/processed/tickets_base.csv
 data/correcciones.csv
 Dataset/
 models/v2/
+data/app.db
+data/app.db-journal
