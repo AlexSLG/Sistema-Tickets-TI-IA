@@ -1,30 +1,15 @@
-"""Pruebas del sistema de tickets (Sprint 2): BD, usuarios, roles, tickets, IA, correcciones y panel.
+"""Pruebas del sistema de tickets (Sprint 2): BD, semilla, login, roles y usuarios.
 Usan una BD SQLite temporal (ver conftest.py); los 25 tests del Sprint 1 siguen en test_api.py y test_datos.py."""
 import pytest
-from fastapi.testclient import TestClient
 from sqlalchemy import select
 
 from src.sistema import db as bd
 from src.sistema import semilla
 from src.sistema.modelos import Tecnico, Usuario
 from src.sistema.seguridad import verificar_contrasena
+from tests.ayudas import ADMIN, ANA, MARCELA, entrar
 
-
-@pytest.fixture(scope="module")
-def cliente():
-    from src.service.app import app
-    with TestClient(app) as c:
-        yield c
-
-
-@pytest.fixture(autouse=True)
-def bd_limpia(cliente):
-    """Cada prueba parte de una BD vacía con usuarios y técnicos."""
-    bd.Base.metadata.drop_all(bd.engine)
-    bd.Base.metadata.create_all(bd.engine)
-    with bd.SessionLocal() as s:
-        semilla.sembrar(s, n_historial=0)
-    yield
+pytestmark = pytest.mark.usefixtures("bd_limpia")
 
 
 # ------------------------------------------------------------------ fase 1: BD y semilla
@@ -43,17 +28,6 @@ def test_semilla_crea_usuarios_y_tecnicos():
 
 
 # ------------------------------------------------------------------ fase 2: login, roles, usuarios
-ADMIN = ("admin@soporte.local", "Admin123")
-ANA = ("ana.torres@empresa.local", "Usuario123")
-MARCELA = ("marcela.vega@soporte.local", "Soporte123")
-
-
-def entrar(cliente, cred):
-    r = cliente.post("/api/auth/login", json={"correo": cred[0], "contrasena": cred[1]})
-    assert r.status_code == 200, r.text
-    return {"Authorization": f"Bearer {r.json()['token']}"}
-
-
 def test_login_correcto_e_incorrecto(cliente):
     r = cliente.post("/api/auth/login", json={"correo": ANA[0], "contrasena": ANA[1]})
     assert r.status_code == 200 and r.json()["usuario"]["rol"] == "Usuario" and r.json()["token"]

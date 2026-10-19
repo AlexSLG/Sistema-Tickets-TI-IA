@@ -118,10 +118,36 @@ def construir_y_evaluar(directorio, train, val, soluciones, verbose=True):
     return res
 
 
+def reconstruir_indice_soluciones(directorio, verbose=True):
+    """Reconstruye solo el índice de soluciones rápidas (p. ej. tras añadir entradas a soluciones_rapidas.json) conservando los
+    pesos de los modelos y el umbral ya calibrado de la versión. No toca el índice de tickets ni las métricas."""
+    directorio = Path(directorio)
+    vocab, gru = cargar_gru(directorio)
+    cfg = json.loads((directorio / "config.json").read_text(encoding="utf-8"))
+    soluciones = json.loads((PROCESSED / "soluciones_rapidas.json").read_text(encoding="utf-8"))
+    train = cargar_split("train")
+    tr_real = train[train["real"]].drop_duplicates("id")
+    textos_sr, ids = [], []
+    for s in soluciones:
+        for f in s["frases_ejemplo"] + [s["problema"]]:
+            textos_sr.append(f)
+            ids.append(s["id"])
+    E_f = embeddings_texto(vocab, gru, textos_sr)
+    vec_sr = TfidfVectorizer(analyzer="char_wb", ngram_range=(3, 5), sublinear_tf=True).fit(
+        [normalizar_texto(t) for t in texto_ticket(tr_real)] + [normalizar_texto(t) for t in textos_sr])
+    T_f = vec_sr.transform([normalizar_texto(t) for t in textos_sr])
+    SolucionesRapidas(soluciones, E_f, ids, vec_sr, T_f, cfg["umbral_solucion_rapida"]).guardar(directorio)
+    if verbose:
+        print(f"  índice de soluciones rápidas reconstruido: {len(soluciones)} entradas, {len(textos_sr)} textos, umbral {cfg['umbral_solucion_rapida']}")
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--modelos", default=str(RAIZ / "models" / "v1"))
+    ap.add_argument("--solo-soluciones", action="store_true", help="reconstruye solo el índice de soluciones rápidas")
     a = ap.parse_args()
+    if a.solo_soluciones:
+        return reconstruir_indice_soluciones(a.modelos)
     soluciones = json.loads((PROCESSED / "soluciones_rapidas.json").read_text(encoding="utf-8"))
     construir_y_evaluar(a.modelos, cargar_split("train"), cargar_split("val"), soluciones)
 

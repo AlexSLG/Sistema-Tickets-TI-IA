@@ -76,10 +76,11 @@ def al_iniciar():
 
 
 # ------------------------------------------------------------------ sistema de tickets (Sprint 2)
-from src.sistema.rutas import auth as _auth, usuarios as _usuarios  # noqa: E402
+from src.sistema.rutas import auth as _auth, tickets as _tickets, usuarios as _usuarios  # noqa: E402
 
 app.include_router(_auth.router)
 app.include_router(_usuarios.router)
+app.include_router(_tickets.router)
 
 
 # ------------------------------------------------------------------ inferencia

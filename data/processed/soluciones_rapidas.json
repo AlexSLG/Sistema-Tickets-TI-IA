@@ -893,5 +893,25 @@
       "Si es legítimo, abre un ticket indicando la dirección y el motivo de negocio: Seguridad evaluará su desbloqueo."
     ],
     "semilla": "redacción propia"
+  },
+  {
+    "id": "SR-51",
+    "categoria": "Correo",
+    "problema": "No puedo entrar a mi correo: dice que la contraseña es incorrecta",
+    "frases_ejemplo": [
+      "no puedo entrar a mi correo, dice contraseña incorrecta",
+      "mi correo dice que la contraseña es incorrecta",
+      "el correo no acepta mi contraseña",
+      "no me deja iniciar sesión en el correo",
+      "no puedo entrar al correo electrónico"
+    ],
+    "pasos": [
+      "Comprueba que no tienes Bloq Mayús activado y que el teclado está en el idioma correcto.",
+      "Escribe la contraseña en el Bloc de notas, cópiala y pégala en el campo para descartar errores de tecleo.",
+      "Prueba entrar desde la versión web del correo (webmail) con otro navegador.",
+      "Si cambiaste la contraseña hace poco, espera 10 minutos y actualiza la guardada en el móvil y en Outlook.",
+      "Usa «¿Olvidaste tu contraseña?» para restablecerla; si no recibes el mensaje, abre un ticket de Accesos."
+    ],
+    "semilla": "redacción propia"
   }
 ]

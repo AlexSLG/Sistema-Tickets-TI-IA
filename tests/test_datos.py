@@ -82,9 +82,9 @@ def test_historial_coherente():
 
 def test_soluciones_rapidas():
     s = json.loads((PROCESSED / "soluciones_rapidas.json").read_text(encoding="utf-8"))
-    assert len(s) == 50
+    assert len(s) >= 50
     assert {e["categoria"] for e in s} == CATEGORIAS
     for e in s:
         assert {"id", "categoria", "problema", "frases_ejemplo", "pasos"} <= set(e)
         assert 3 <= len(e["frases_ejemplo"]) <= 5 and len(e["pasos"]) >= 3
-    assert len({e["id"] for e in s}) == 50
+    assert len({e["id"] for e in s}) == len(s)

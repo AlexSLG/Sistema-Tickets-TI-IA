@@ -1,6 +1,6 @@
 """Paso 6 · Soluciones rápidas para errores comunes -> data/processed/soluciones_rapidas.json
 
-50 entradas. Las de Hardware, Red, Accesos y Software parten de las notas de resolución de `tech-support`
+51 entradas. Las de Hardware, Red, Accesos y Software parten de las notas de resolución de `tech-support`
 (`resolution_notes`); las de Correo y Seguridad no tienen una semilla directa en las fuentes (las respuestas `answer` de la
 fuente principal son plantillas genéricas) y se redactaron con criterio de mesa de ayuda: el equipo debe validarlas.
 Cada entrada: id, categoria, problema, frases_ejemplo (3–5 formas de describirlo), pasos y `semilla` (origen de la idea). Se indexan las `frases_ejemplo` para la similitud (paso 7).
@@ -222,6 +222,12 @@ E = [
      ["el firewall bloquea una página", "no puedo entrar a un sitio, dice bloqueado", "el sistema dice que el sitio no es seguro", "una aplicación fue bloqueada por seguridad"],
      ["Comprueba que la dirección es la correcta y que necesitas ese sitio para trabajar.", "No desactives el antivirus ni el firewall por tu cuenta.",
       "Si es legítimo, abre un ticket indicando la dirección y el motivo de negocio: Seguridad evaluará su desbloqueo."], EQ),
+    ("Correo", "No puedo entrar a mi correo: dice que la contraseña es incorrecta",
+     ["no puedo entrar a mi correo, dice contraseña incorrecta", "mi correo dice que la contraseña es incorrecta", "el correo no acepta mi contraseña",
+      "no me deja iniciar sesión en el correo", "no puedo entrar al correo electrónico"],
+     ["Comprueba que no tienes Bloq Mayús activado y que el teclado está en el idioma correcto.", "Escribe la contraseña en el Bloc de notas, cópiala y pégala en el campo para descartar errores de tecleo.",
+      "Prueba entrar desde la versión web del correo (webmail) con otro navegador.", "Si cambiaste la contraseña hace poco, espera 10 minutos y actualiza la guardada en el móvil y en Outlook.",
+      "Usa «¿Olvidaste tu contraseña?» para restablecerla; si no recibes el mensaje, abre un ticket de Accesos."], EQ),
 ]
 
 
@@ -231,7 +237,7 @@ def main():
         assert 3 <= len(frases) <= 5, (problema, len(frases))
         assert 3 <= len(pasos) <= 6, (problema, len(pasos))
         salida.append({"id": f"SR-{i:02d}", "categoria": cat, "problema": problema, "frases_ejemplo": frases, "pasos": pasos, "semilla": semilla})
-    assert len(salida) == 50, len(salida)
+    assert len(salida) == 51, len(salida)
     ruta = RAIZ / "data" / "processed" / "soluciones_rapidas.json"
     ruta.write_text(json.dumps(salida, ensure_ascii=False, indent=2), encoding="utf-8")
     por_cat = {}
