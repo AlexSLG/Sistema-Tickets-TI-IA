@@ -132,5 +132,39 @@ VISTAS["modelos"] = async (cont) => {
   pintarEstado(est);
 };
 
-/* Panel de métricas: se completa en la fase 8 */
-VISTAS["panel"] = async (cont) => { cont.replaceChildren(el("p", { class: "suave", texto: "Panel de métricas: en construcción." })); };
+/* ------------------------------------------------------------------ panel de métricas (HU28, HU29, HU30) */
+VISTAS["panel"] = async (cont) => {
+  const d = await GET("/api/panel/resumen");
+  const propio = d.alcance === "propios";
+  const kpi = (v, t) => el("div", { class: "kpi" }, el("b", { texto: v }), el("span", { texto: t }));
+  const barras = (titulo, datos, color) => {
+    const max = Math.max(1, ...Object.values(datos));
+    return el("div", { class: "tarjeta" }, el("h2", { texto: titulo }), Object.entries(datos).map(([k, v]) =>
+      el("div", { class: "hbarra" }, el("span", { texto: k }), el("div", { class: "pista" }, el("div", { class: "relleno", style: `width:${(100 * v / max).toFixed(0)}%` + (color ? `;background:${color(k)}` : "") })), el("span", { class: "derecha", texto: v }))));
+  };
+  const colorPrio = { Baja: "#6aa985", Media: "#d9b43c", Alta: "#e08a3c", "Crítica": "#c0392b" };
+  const ia = d.sugerencias_ia;
+  const maxDia = Math.max(1, ...d.por_dia.map((x) => x.tickets));
+  cont.replaceChildren(
+    el("div", { class: "cabecera" }, el("div", {}, el("h1", { texto: propio ? "Mi resumen" : "Panel de métricas" }),
+      el("p", { class: "suave", texto: propio ? "Resumen de los tickets que tienes asignados." : "Resumen de todos los tickets del sistema." }))),
+    el("div", { class: "kpis" }, kpi(d.total, "Tickets en total"), kpi(d.abiertos, "Abiertos o en progreso"), kpi(horas(d.tiempo_resolucion.promedio_horas), "Tiempo promedio de resolución"),
+      kpi(d.resueltos_con_solucion_rapida, "Resueltos con solución rápida"), kpi(ia.categoria_aceptada === null ? "—" : pct(ia.categoria_aceptada), "Categorías de la IA aceptadas"),
+      kpi(ia.prioridad_aceptada === null ? "—" : pct(ia.prioridad_aceptada), "Prioridades de la IA aceptadas")),
+    el("div", { class: "rejilla tres" }, barras("Por estado", d.por_estado), barras("Por categoría", d.por_categoria), barras("Por prioridad", d.por_prioridad, (k) => colorPrio[k]), barras("Por área del técnico", d.por_area)),
+    el("div", { class: "tarjeta" }, el("h2", { texto: "Tickets por día (últimos 14 días)" }),
+      el("div", { class: "dias" }, d.por_dia.map((x) => el("div", { class: "col", title: `${x.fecha}: ${x.tickets}` }, el("span", { texto: x.tickets || "" }),
+        el("div", { class: "barra", style: `height:${(100 * x.tickets / maxDia * 0.8).toFixed(0)}%` }), el("span", { texto: x.fecha.slice(8) }))))),
+    el("div", { class: "rejilla" },
+      el("div", { class: "tarjeta" }, el("h2", { texto: "Carga actual frente al límite" }), d.carga_tecnicos.map((t) =>
+        el("div", { class: "hbarra carga" }, el("span", { texto: t.nombre.split(" ")[0] + (t.disponible ? "" : " (no disp.)") }),
+          el("div", { class: "pista" }, el("div", { class: "relleno" + (t.carga >= t.limite ? " lleno" : t.carga >= 0.8 * t.limite ? " alto" : ""), style: `width:${Math.min(100, 100 * t.carga / t.limite)}%` })),
+          el("span", { class: "derecha", texto: `${t.carga}/${t.limite}` })))),
+      el("div", { class: "tarjeta" }, el("h2", { texto: "Tiempo de resolución por técnico" }),
+        el("p", { class: "suave pequeno", texto: `${d.tiempo_resolucion.resueltos} tickets resueltos por técnicos (sin contar los resueltos con solución rápida).` }),
+        el("table", { class: "tabla" }, el("thead", {}, el("tr", {}, el("th", { texto: "Técnico" }), el("th", { class: "num", texto: "Resueltos" }), el("th", { class: "num", texto: "Promedio" }))),
+          el("tbody", {}, d.tiempo_resolucion.por_tecnico.map((t) => el("tr", {}, el("td", { texto: t.nombre }), el("td", { class: "num", texto: t.resueltos }), el("td", { class: "num", texto: horas(t.promedio_horas) })))))),
+      el("div", { class: "tarjeta" }, el("h2", { texto: "Calidad de las sugerencias de la IA" }),
+        el("p", { texto: ia.analizados ? `De ${ia.analizados} tickets analizados, ${ia.corregidos} tuvieron la categoría corregida por Soporte.` : "Todavía no hay tickets analizados." }),
+        el("p", { class: "suave pequeno", texto: "Una sugerencia se considera aceptada si el ticket conserva la categoría o prioridad que propuso el modelo." }))));
+};
