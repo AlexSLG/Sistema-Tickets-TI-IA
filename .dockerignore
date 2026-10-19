@@ -4,11 +4,8 @@
 Dataset/
 data/raw/
 data/interim/
-data/processed/tickets*.csv
-data/processed/train.csv
-data/processed/val.csv
-data/processed/test.csv
-data/processed/historial_asignaciones.csv
+data/app.db
+data/processed/tickets_base.csv
 notebooks/
 tests/
 __pycache__/

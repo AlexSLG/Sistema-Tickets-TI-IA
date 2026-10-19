@@ -1,7 +1,7 @@
-# Servicio de inferencia (API + página de prueba) con los modelos entrenados.
-# Antes de construir hay que tener entrenados los modelos (python -m src.training.entrenar_todo) para que exista models/<versión>/.
-#   docker build -t tickets-ti-ia .
-#   docker run --rm -p 8000:8000 tickets-ti-ia        ->  http://localhost:8000
+# Sistema de tickets TI con IA (API, interfaz web y modelos entrenados).
+# Antes de construir hay que tener entrenados los modelos (models/v1/ está en el repositorio).
+#   docker compose up --build        ->  http://localhost:8000   (levanta también PostgreSQL)
+#   docker build -t tickets-ti-ia .  (solo la imagen; sin DATABASE_URL usa SQLite dentro del contenedor)
 FROM python:3.11-slim
 
 WORKDIR /app
@@ -12,10 +12,12 @@ RUN pip install --no-cache-dir -r requirements-servicio.txt
 
 COPY src/ src/
 COPY models/ models/
-COPY data/processed/tecnicos.csv data/processed/soluciones_rapidas.json data/processed/
+COPY data/processed/ data/processed/
 COPY reports/figuras/ reports/figuras/
-RUN mkdir -p data && touch src/__init__.py
+RUN touch src/__init__.py
 
 EXPOSE 8000
-HEALTHCHECK --interval=30s --timeout=5s --start-period=40s CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/salud')" || exit 1
+# La primera vez la app crea las tablas y carga los datos de demostración (puede tardar ~30 s)
+HEALTHCHECK --interval=15s --timeout=5s --start-period=90s --retries=5 \
+  CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/salud')" || exit 1
 CMD ["uvicorn", "src.service.app:app", "--host", "0.0.0.0", "--port", "8000"]

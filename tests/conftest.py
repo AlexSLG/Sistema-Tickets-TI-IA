@@ -27,3 +27,14 @@ def bd_limpia(cliente):
     with bd.SessionLocal() as s:
         semilla.sembrar(s, n_historial=0)
     yield
+
+
+@pytest.fixture(autouse=True)
+def correcciones_en_archivo_temporal(tmp_path, monkeypatch):
+    """Ninguna prueba escribe en el data/correcciones.csv real."""
+    import src.service.app as app_mod
+    import src.training.reentrenar as re_mod
+    ruta = tmp_path / "correcciones.csv"
+    monkeypatch.setattr(re_mod, "CORRECCIONES", ruta)
+    monkeypatch.setattr(app_mod, "CORRECCIONES", ruta)
+    yield ruta

@@ -1,0 +1,35 @@
+# Sistema de tickets TI con IA: aplicación + PostgreSQL 16.
+#   docker compose up --build      ->  http://localhost:8000
+#   docker compose down            (conserva los datos)      docker compose down -v   (borra la base de datos)
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: tickets
+      POSTGRES_PASSWORD: tickets
+      POSTGRES_DB: tickets
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tickets -d tickets"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql+psycopg://tickets:tickets@db:5432/tickets
+      SECRETO_JWT: ${SECRETO_JWT:-cambia-esta-clave-en-produccion-sprint3}
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./models:/app/models   # versiones de modelos y registry.json: el reentrenamiento persiste
+      - ./data:/app/data       # data/processed y data/correcciones.csv: las correcciones persisten
+    restart: unless-stopped
+
+volumes:
+  pgdata:
