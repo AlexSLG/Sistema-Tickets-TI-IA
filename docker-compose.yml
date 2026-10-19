@@ -8,6 +8,7 @@ services:
       POSTGRES_USER: tickets
       POSTGRES_PASSWORD: tickets
       POSTGRES_DB: tickets
+    restart: unless-stopped
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -25,7 +26,7 @@ services:
       DATABASE_URL: postgresql+psycopg://tickets:tickets@db:5432/tickets
       SECRETO_JWT: ${SECRETO_JWT:-cambia-esta-clave-en-produccion-sprint3}
     ports:
-      - "8000:8000"
+      - "${PUERTO_APP:-8000}:8000"   # si el 8000 está ocupado: PUERTO_APP=8001 docker compose up -d
     volumes:
       - ./models:/app/models   # versiones de modelos y registry.json: el reentrenamiento persiste
       - ./data:/app/data       # data/processed y data/correcciones.csv: las correcciones persisten

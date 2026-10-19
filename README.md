@@ -52,6 +52,8 @@ docker compose down                # detiene; los datos se conservan
 docker compose down -v             # además borra la base de datos (la próxima vez vuelve a cargar los datos de demostración)
 ```
 
+Para que arranque solo al encender el equipo: levántalo con `docker compose up -d --build` (en segundo plano), activa *Start Docker Desktop when you sign in* en Docker Desktop y no uses `docker compose down` (los contenedores tienen `restart: unless-stopped`). Si el puerto 8000 está ocupado por otro proyecto: `PUERTO_APP=8001 docker compose up -d` (en PowerShell: `$env:PUERTO_APP=8001; docker compose up -d`).
+
 El contenedor `app` espera a que PostgreSQL esté sano, crea las tablas y carga los datos de demostración si la base está vacía (el primer arranque tarda ≈ 1 minuto). `models/` y `data/` se montan como volúmenes: las versiones de modelos y `data/correcciones.csv` persisten. Probado en este proyecto: `scripts/prueba_humo.py` recorre el guion completo contra los contenedores.
 
 ## Credenciales de demostración
