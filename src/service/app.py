@@ -76,11 +76,12 @@ def al_iniciar():
 
 
 # ------------------------------------------------------------------ sistema de tickets (Sprint 2)
-from src.sistema.rutas import auth as _auth, tickets as _tickets, usuarios as _usuarios  # noqa: E402
+from src.sistema.rutas import auth as _auth, tecnicos as _tecnicos, tickets as _tickets, usuarios as _usuarios  # noqa: E402
 
 app.include_router(_auth.router)
 app.include_router(_usuarios.router)
 app.include_router(_tickets.router)
+app.include_router(_tecnicos.router)
 
 
 # ------------------------------------------------------------------ inferencia
@@ -204,6 +205,12 @@ app.mount("/estatico", StaticFiles(directory=str(ESTATICO)), name="estatico")
 
 
 @app.get("/", include_in_schema=False)
+def sistema():
+    """Sistema de tickets (Sprint 2)."""
+    return FileResponse(ESTATICO / "sistema" / "index.html")
+
+
 @app.get("/laboratorio", include_in_schema=False)
-def pagina():
+def laboratorio():
+    """Página de prueba de los modelos (Sprint 1)."""
     return FileResponse(ESTATICO / "index.html")

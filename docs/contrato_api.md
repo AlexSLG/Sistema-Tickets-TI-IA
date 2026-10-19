@@ -74,7 +74,7 @@ Servicio FastAPI que carga la **versión activa** de `models/registry.json`. El 
 }
 ```
 
-- `tecnicos` viene **ordenado**: el primero (`recomendado: true`) es la asignación sugerida. Los técnicos que ya alcanzaron su límite de carga (`saturado: true`) pasan al final; si todos están al límite se recomienda al de menor ocupación. `nota` explica cuándo se salta al técnico más adecuado por estar saturado. `adecuacion` es el puntaje del MLP convertido a porcentaje entre técnicos.
+- `tecnicos` viene **ordenado**: el primero (`recomendado: true`) es la asignación sugerida. Los técnicos que ya alcanzaron su límite de carga (`saturado: true`) pasan al final; si todos están al límite se recomienda al de menor ocupación. `nota` explica cuándo se salta al técnico más adecuado por estar saturado. `adecuacion` es el puntaje del MLP convertido a porcentaje entre técnicos (softmax con temperatura 5 para que sea legible).
 - `solucion_rapida` es `null` cuando ninguna entrada supera el umbral de similitud (calibrado por versión; v1: 0,65). Es un detector conservador: funciona mejor con textos cortos y parecidos a los ejemplos.
 - `similares` son 5 tickets ya atendidos; `solucion` es `null` si el caso no tiene solución registrada.
 - La **prioridad** se calcula con impacto, urgencia y usuarios afectados (la categoría llega como probabilidades de la clasificación).

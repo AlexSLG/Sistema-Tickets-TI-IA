@@ -16,6 +16,7 @@ from src.models.similitud import IndiceTickets, SolucionesRapidas
 from src.training import registro
 from src.training.entrenar_prioridad import cargar_gru
 
+TEMPERATURA_ADECUACION = 5.0  # los puntajes del MLP están muy separados; sin suavizar, el porcentaje sería casi siempre 100 % / 0 %
 CARGA_INICIAL = 0.4  # fracción del límite con la que arranca el estado de los técnicos (se puede editar con PUT /api/tecnicos)
 
 
@@ -94,8 +95,8 @@ class Servicio:
         p0 = puntuar(self.mlp_asig, features_batch(np.array([cat_idx]), np.array([prio_idx]), np.zeros_like(car), lim, apt, self.tiempos))[0]
         ideal = int(np.argmax(p0))
         todos_llenos = bool((car[0] >= lim).all())
-        e = np.exp(p - p.max())
-        adecuacion = e / e.sum()  # softmax entre los técnicos: lectura en % del puntaje
+        e = np.exp((p - p.max()) / TEMPERATURA_ADECUACION)
+        adecuacion = e / e.sum()  # softmax suavizado entre los técnicos: lectura en % del puntaje
         salida = []
         for pos, i in enumerate(orden):
             sat = bool(car[0, i] >= lim[i])
