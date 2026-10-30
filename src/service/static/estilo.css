@@ -16,7 +16,7 @@ body { margin: 0; font: 15px/1.5 system-ui, "Segoe UI", Roboto, sans-serif; back
 .pestanas { display: flex; gap: 4px; padding: 10px 24px 0; border-bottom: 1px solid var(--borde); background: var(--tarjeta); overflow-x: auto; }
 .pestanas button { border: 0; background: none; padding: 10px 16px; font: inherit; color: var(--suave); cursor: pointer; border-bottom: 3px solid transparent; white-space: nowrap; }
 .pestanas button.activa { color: var(--primario); border-bottom-color: var(--primario); font-weight: 600; }
-main { max-width: 1180px; margin: 0 auto; padding: 20px 16px 40px; }
+main { max-width: 1600px; margin: 0 auto; padding: 20px clamp(16px, 2.6vw, 40px) 40px; }
 .panel[hidden] { display: none; }
 .rejilla { display: grid; gap: 16px; }
 .rejilla.dos { grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); align-items: start; }
