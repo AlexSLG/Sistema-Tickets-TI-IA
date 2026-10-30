@@ -74,25 +74,29 @@ class Servicio:
         logits, emb = predecir(self.gru, X, L)
         return emb.numpy(), torch.softmax(logits, 1).numpy()[0]
 
-    def asignar(self, cat_idx, prio_idx, cargas=None, limites=None, aptitudes=None, no_disponibles=None):
+    def asignar(self, cat_idx, prio_idx, cargas=None, limites=None, aptitudes=None, no_disponibles=None, info=None):
         """Puntajes del MLP + reglas de balanceo. Devuelve la lista de técnicos en orden de asignación.
 
         Sin parámetros usa el estado en memoria y tecnicos.csv (página de prueba). El sistema de tickets pasa los valores
-        reales de su base de datos: `cargas` y `limites` ({id: n}), `aptitudes` ({id: {categoría: nivel}}) y los técnicos
-        `no_disponibles` (se tratan como saturados)."""
+        reales de su base de datos: `cargas` y `limites` ({id: n}), `aptitudes` ({id: {categoría: nivel}}), los técnicos
+        `no_disponibles` (se tratan como saturados) e `info` ({id: {"nombre", "area"}}). Con `aptitudes`, la lista de técnicos
+        es la de la BD: un técnico que no estaba en tecnicos.csv usa el tiempo medio de resolución de todo el equipo."""
         cargas = self.cargas if cargas is None else cargas
-        lim = self.limites if limites is None else np.array([limites[t] for t in self.ids], dtype=np.float32)
-        if aptitudes is None:
-            apt = self.aptitudes
-        else:
-            apt = np.array([[aptitudes[t][c] for c in CATEGORIAS] for t in self.ids], dtype=np.float32)
+        ids = self.ids if aptitudes is None else list(aptitudes)
+        lim = self.limites if limites is None else np.array([limites[t] for t in ids], dtype=np.float32)
+        apt = self.aptitudes if aptitudes is None else np.array([[aptitudes[t][c] for c in CATEGORIAS] for t in ids], dtype=np.float32)
+        tiempo_equipo = self.tiempos.mean(axis=0)
+        tiempos = np.stack([self.tiempos[self.ids.index(t)] if t in self.ids else tiempo_equipo for t in ids])
+        nombres = {t: (r.nombre, r.area) for t, r in zip(self.ids, self.tecnicos.itertuples())}
+        if info:
+            nombres.update({t: (d["nombre"], d["area"]) for t, d in info.items()})
         no_disp = set(no_disponibles or [])
-        car = np.array([[lim[i] if t in no_disp else cargas[t] for i, t in enumerate(self.ids)]], dtype=np.float32)
-        X = features_batch(np.array([cat_idx]), np.array([prio_idx]), car, lim, apt, self.tiempos)
+        car = np.array([[lim[i] if t in no_disp else cargas[t] for i, t in enumerate(ids)]], dtype=np.float32)
+        X = features_batch(np.array([cat_idx]), np.array([prio_idx]), car, lim, apt, tiempos)
         p = puntuar(self.mlp_asig, X)[0]
         orden, elegido = balancear(p, car[0], lim)
         # el técnico más adecuado "en frío" (sin carga): sirve para explicar cuándo el balanceo lo salta
-        p0 = puntuar(self.mlp_asig, features_batch(np.array([cat_idx]), np.array([prio_idx]), np.zeros_like(car), lim, apt, self.tiempos))[0]
+        p0 = puntuar(self.mlp_asig, features_batch(np.array([cat_idx]), np.array([prio_idx]), np.zeros_like(car), lim, apt, tiempos))[0]
         ideal = int(np.argmax(p0))
         todos_llenos = bool((car[0] >= lim).all())
         e = np.exp((p - p.max()) / TEMPERATURA_ADECUACION)
@@ -101,7 +105,7 @@ class Servicio:
         for pos, i in enumerate(orden):
             sat = bool(car[0, i] >= lim[i])
             nota = None
-            if self.ids[i] in no_disp:
+            if ids[i] in no_disp:
                 nota = "No disponible: se trata como saturado."
             elif i == ideal and sat:
                 nota = "Es el más adecuado por aptitud, pero está al límite de carga: la asignación pasa al siguiente."
@@ -109,14 +113,15 @@ class Servicio:
                 nota = "Todos los técnicos están al límite de carga: se elige el de menor ocupación."
             elif pos == 0 and i != ideal:
                 nota = "Mejor opción con capacidad disponible."
-            if i == ideal and self.ids[i] in no_disp:
+            if i == ideal and ids[i] in no_disp:
                 nota = "Era el más adecuado por aptitud, pero no está disponible: la asignación pasa al siguiente."
-            salida.append({"id_tecnico": self.ids[i], "nombre": self.tecnicos.iloc[i]["nombre"], "area": self.tecnicos.iloc[i]["area"],
+            nombre, area = nombres.get(ids[i], (ids[i], ""))
+            salida.append({"id_tecnico": ids[i], "nombre": nombre, "area": area,
                            "aptitud": int(apt[i, cat_idx]), "carga": int(car[0, i]), "limite_carga": int(lim[i]),
                            "saturado": sat, "puntaje": float(p[i]), "adecuacion": float(adecuacion[i]), "recomendado": pos == 0, "nota": nota})
         return salida
 
-    def analizar(self, titulo, descripcion, impacto, urgencia, usuarios_afectados, cargas=None, limites=None, aptitudes=None, no_disponibles=None):
+    def analizar(self, titulo, descripcion, impacto, urgencia, usuarios_afectados, cargas=None, limites=None, aptitudes=None, no_disponibles=None, info=None):
         t0 = time.perf_counter()
         texto = f"{titulo} . {descripcion}"
         with torch.no_grad():
@@ -125,7 +130,7 @@ class Servicio:
             x = construir_features(fila, emb, cat_probs=p_cat[None, :])
             p_pri = predecir_proba(self.mlp_prio, x)[0]
         cat_idx, pri_idx = int(p_cat.argmax()), int(p_pri.argmax())
-        tecnicos = self.asignar(cat_idx, pri_idx, cargas, limites, aptitudes, no_disponibles)
+        tecnicos = self.asignar(cat_idx, pri_idx, cargas, limites, aptitudes, no_disponibles, info)
         rapida = self.rapidas.consultar(emb[0], texto)
         similares = self._similares(emb[0], 5)
         return {

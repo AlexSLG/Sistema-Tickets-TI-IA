@@ -28,12 +28,29 @@ function el(tag, props, ...hijos) {
 }
 const pct = (x, d = 1) => (x * 100).toFixed(d).replace(".", ",") + " %";
 const num = (x, d = 3) => Number(x).toFixed(d).replace(".", ",");
+/* Sesión: la misma que usa el sistema de tickets (sessionStorage "sesion-tickets"). Las operaciones que cambian cargas,
+   correcciones o modelos exigen un Administrador; la lectura y el análisis no. */
+const CLAVE_SESION = "sesion-tickets";
+function sesion() { try { return JSON.parse(sessionStorage.getItem(CLAVE_SESION) || "null"); } catch (e) { return null; } }
+function pintarSesion() {
+  const s = sesion(), nodo = $("sesion-lab");
+  nodo.replaceChildren(s ? el("span", { texto: `${s.usuario.nombre} · ${s.usuario.rol}` }) : el("span", { texto: "Sin sesión (solo lectura)" }),
+    el("button", { class: "secundario", texto: s ? "Salir" : "Entrar como Administrador", onclick: () => {
+      if (s) { sessionStorage.removeItem(CLAVE_SESION); pintarSesion(); } else { $("dlg-login").showModal(); } } }));
+}
 async function api(ruta, opciones) {
+  opciones = opciones || {};
+  const s = sesion();
+  if (s && s.token) opciones.headers = { ...(opciones.headers || {}), Authorization: `Bearer ${s.token}` };
   const r = await fetch(ruta, opciones);
   let cuerpo = null;
   try { cuerpo = await r.json(); } catch (e) { /* sin cuerpo */ }
   if (!r.ok) {
     const det = cuerpo && cuerpo.detail;
+    if (r.status === 401 || r.status === 403) {
+      if (r.status === 401) { sessionStorage.removeItem(CLAVE_SESION); pintarSesion(); $("dlg-login").showModal(); }
+      throw new Error((typeof det === "string" ? det : "Sin permiso.") + " Esta acción requiere iniciar sesión como Administrador.");
+    }
     throw new Error(typeof det === "string" ? det : (Array.isArray(det) ? det.map((x) => x.msg).join("; ") : `Error ${r.status}`));
   }
   return cuerpo;
@@ -338,3 +355,16 @@ $("btn-reentrenar").addEventListener("click", async () => {
   } catch (e) { $("estado-modelo").textContent = "Sin modelos: " + e.message; }
   cargarEjemplo(EJEMPLOS[0]);
 })();
+
+/* ------------------------------------------------------------------ inicio de sesión del Administrador */
+$("form-login").addEventListener("submit", async (ev) => {
+  ev.preventDefault();
+  try {
+    const r = await post("/api/auth/login", { correo: $("l-correo").value.trim(), contrasena: $("l-contrasena").value });
+    if (r.usuario.rol !== "Administrador") { mensaje($("msg-login"), "Ese usuario no es Administrador.", "error"); return; }
+    sessionStorage.setItem(CLAVE_SESION, JSON.stringify({ token: r.token, usuario: r.usuario }));
+    $("l-contrasena").value = ""; mensaje($("msg-login"), "", ""); $("dlg-login").close(); pintarSesion();
+  } catch (e) { mensaje($("msg-login"), e.message, "error"); }
+});
+$("btn-cancelar-login").addEventListener("click", () => $("dlg-login").close());
+pintarSesion();

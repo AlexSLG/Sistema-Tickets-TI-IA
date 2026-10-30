@@ -75,6 +75,7 @@ VISTAS["modelos"] = async (cont) => {
   const kpi = (v, t) => el("div", { class: "kpi" }, el("b", { texto: v }), el("span", { texto: t }));
   const epocas = el("input", { type: "number", min: 1, max: 30, value: 3, style: "width:90px" });
   const btn = el("button", { class: "primario", texto: "Reentrenar con las correcciones" });
+  const faltan = Math.max(0, (est.minimo_correcciones || 0) - (est.correcciones_validas || 0));
 
   function pintarEstado(e) {
     if (e.estado === "ejecutando") {
@@ -83,7 +84,7 @@ VISTAS["modelos"] = async (cont) => {
       temporizadorModelos = setTimeout(async () => { if (location.hash === "#/modelos") pintarEstado(await GET("/api/reentrenar/estado")); }, 3000);
       return;
     }
-    btn.disabled = false;
+    btn.disabled = faltan > 0;
     if (e.estado === "terminado" || e.estado === "error") {
       const x = e.resultado || {};
       zonaProgreso.replaceChildren(el("div", { class: x.publicada ? "exito" : "aviso" },
@@ -114,6 +115,9 @@ VISTAS["modelos"] = async (cont) => {
           el("td", {}, v.estado === "publicada" && v.version !== reg.activa ? el("button", { texto: "Activar", onclick: () => activar(v.version) }) : null))))), msg),
       el("div", { class: "tarjeta" }, el("h2", { texto: "Reentrenamiento" }),
         el("p", { class: "suave pequeno", texto: "Reentrena desde la versión activa con las correcciones y la compara en un conjunto de referencia fijo. Solo se publica si su F1 macro iguala o supera al de la vigente. Tarda unos minutos." }),
+        el("p", { class: faltan ? "aviso pequeno" : "suave pequeno", texto: faltan
+          ? `Se necesitan al menos ${est.minimo_correcciones} correcciones válidas para reentrenar (hay ${est.correcciones_validas}). Con pocas correcciones el modelo no cambia de forma medible.`
+          : `Correcciones válidas: ${est.correcciones_validas} (mínimo ${est.minimo_correcciones}).` }),
         el("div", { class: "acciones" }, el("label", { style: "margin:0" }, "Épocas máximas ", epocas), btn), zonaProgreso,
         el("h3", {}, "Correcciones guardadas ", etq(corr.length, "neutra")),
         corr.length ? el("table", { class: "tabla" }, el("thead", {}, el("tr", {}, ["Ticket", "Categoría", "Prioridad", "Fecha"].map((h) => el("th", { texto: h })))),

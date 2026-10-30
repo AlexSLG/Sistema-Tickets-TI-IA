@@ -22,11 +22,22 @@ def cliente():
         yield c
 
 
+@pytest.fixture
+def h(cliente):
+    """Cabecera de un Administrador: las operaciones que cambian el laboratorio o los modelos lo exigen."""
+    from src.sistema import db as bd, semilla
+    from tests.ayudas import ADMIN, entrar
+    with bd.SessionLocal() as s:
+        if semilla.bd_vacia(s):
+            semilla.sembrar(s, n_historial=0)
+    return entrar(cliente, ADMIN)
+
+
 @pytest.fixture(autouse=True)
-def cargas_limpias(cliente):
+def cargas_limpias(cliente, h):
     """Cada prueba parte de las cargas iniciales (40 % del límite)."""
     estado = cliente.get("/api/tecnicos").json()
-    cliente.put("/api/tecnicos", json={"cargas": {t["id_tecnico"]: round(0.4 * t["limite_carga"]) for t in estado}})
+    cliente.put("/api/tecnicos", headers=h, json={"cargas": {t["id_tecnico"]: round(0.4 * t["limite_carga"]) for t in estado}})
     yield
 
 
@@ -70,11 +81,11 @@ def test_prioridad_sigue_la_matriz_impacto_urgencia(cliente):
     assert prio("Bajo", "Baja") == "Baja"
 
 
-def test_balanceo_el_mas_apto_saturado_pasa_al_siguiente(cliente):
+def test_balanceo_el_mas_apto_saturado_pasa_al_siguiente(cliente, h):
     base = cliente.post("/api/analizar", json=TICKET_VPN).json()
     primero = base["tecnicos"][0]
     estado = {t["id_tecnico"]: t for t in cliente.get("/api/tecnicos").json()}
-    cliente.put("/api/tecnicos", json={"cargas": {primero["id_tecnico"]: estado[primero["id_tecnico"]]["limite_carga"]}})
+    cliente.put("/api/tecnicos", headers=h, json={"cargas": {primero["id_tecnico"]: estado[primero["id_tecnico"]]["limite_carga"]}})
     nuevo = cliente.post("/api/analizar", json=TICKET_VPN).json()
     assert nuevo["tecnicos"][0]["id_tecnico"] != primero["id_tecnico"]
     saturado = next(t for t in nuevo["tecnicos"] if t["id_tecnico"] == primero["id_tecnico"])
@@ -83,22 +94,22 @@ def test_balanceo_el_mas_apto_saturado_pasa_al_siguiente(cliente):
     assert "capacidad" in (nuevo["tecnicos"][0]["nota"] or "")       # y qué técnico lo reemplaza
 
 
-def test_balanceo_ningun_tecnico_supera_su_limite_si_hay_otro_con_capacidad(cliente):
+def test_balanceo_ningun_tecnico_supera_su_limite_si_hay_otro_con_capacidad(cliente, h):
     estado = cliente.get("/api/tecnicos").json()
     # saturar a todos menos al técnico T03
     cargas = {t["id_tecnico"]: t["limite_carga"] for t in estado}
     cargas["T03"] = 0
-    cliente.put("/api/tecnicos", json={"cargas": cargas})
+    cliente.put("/api/tecnicos", headers=h, json={"cargas": cargas})
     for titulo, desc in [("VPN", "No conecta la VPN"), ("Contraseña", "Olvidé mi contraseña"), ("Monitor", "El monitor parpadea")]:
         j = cliente.post("/api/analizar", json={**TICKET_VPN, "titulo": titulo, "descripcion": desc}).json()
         assert j["tecnicos"][0]["id_tecnico"] == "T03" and not j["tecnicos"][0]["saturado"]
 
 
-def test_balanceo_todos_al_limite_elige_el_de_menor_ocupacion(cliente):
+def test_balanceo_todos_al_limite_elige_el_de_menor_ocupacion(cliente, h):
     estado = cliente.get("/api/tecnicos").json()
     cargas = {t["id_tecnico"]: t["limite_carga"] + 3 for t in estado}
     cargas["T07"] = estado[6]["limite_carga"]  # la menor ocupación relativa: justo en el límite
-    cliente.put("/api/tecnicos", json={"cargas": cargas})
+    cliente.put("/api/tecnicos", headers=h, json={"cargas": cargas})
     j = cliente.post("/api/analizar", json=TICKET_VPN).json()
     assert j["tecnicos"][0]["id_tecnico"] == "T07" and j["tecnicos"][0]["saturado"]
     assert "menor ocupación" in j["tecnicos"][0]["nota"]
@@ -120,14 +131,14 @@ def test_similares(cliente):
     assert all(s["similitud"] <= 1.0001 for s in r.json()["similares"])
 
 
-def test_validacion_de_entradas(cliente):
+def test_validacion_de_entradas(cliente, h):
     assert cliente.post("/api/analizar", json={"titulo": "a", "descripcion": "b"}).status_code == 422
     assert cliente.post("/api/analizar", json={**TICKET_VPN, "impacto": "Enorme"}).status_code == 422
-    assert cliente.put("/api/tecnicos", json={"cargas": {"T99": 1}}).status_code == 422
-    assert cliente.put("/api/tecnicos", json={"cargas": {"T01": -2}}).status_code == 422
+    assert cliente.put("/api/tecnicos", headers=h, json={"cargas": {"T99": 1}}).status_code == 422
+    assert cliente.put("/api/tecnicos", headers=h, json={"cargas": {"T01": -2}}).status_code == 422
 
 
-def test_correcciones_se_guardan(cliente, tmp_path, monkeypatch):
+def test_correcciones_se_guardan(cliente, h, tmp_path, monkeypatch):
     import src.service.app as app_mod
     import src.training.reentrenar as re_mod
     ruta = tmp_path / "correcciones.csv"
@@ -135,20 +146,60 @@ def test_correcciones_se_guardan(cliente, tmp_path, monkeypatch):
     monkeypatch.setattr(re_mod, "CORRECCIONES", ruta)
     cuerpo = {"titulo": "Mi VPN falla", "descripcion": "La VPN no conecta", "categoria_corregida": "Red", "prioridad_corregida": "Media",
               "tecnico_reasignado": "T05"}
-    r = cliente.post("/api/correcciones", json=cuerpo)
+    r = cliente.post("/api/correcciones", headers=h, json=cuerpo)
     assert r.status_code == 200 and r.json()["total_correcciones"] == 1
-    assert cliente.post("/api/correcciones", json=cuerpo).json()["total_correcciones"] == 2
+    assert cliente.post("/api/correcciones", headers=h, json=cuerpo).json()["total_correcciones"] == 2
     assert "categoria_corregida" in ruta.read_text(encoding="utf-8").splitlines()[0]
-    assert cliente.post("/api/correcciones", json={**cuerpo, "tecnico_reasignado": "T99"}).status_code == 422
-    assert cliente.post("/api/correcciones", json={**cuerpo, "categoria_corregida": "Otra"}).status_code == 422
+    assert cliente.post("/api/correcciones", headers=h, json={**cuerpo, "tecnico_reasignado": "T99"}).status_code == 422
+    assert cliente.post("/api/correcciones", headers=h, json={**cuerpo, "categoria_corregida": "Otra"}).status_code == 422
 
 
-def test_modelos_y_metricas(cliente):
+def test_modelos_y_metricas(cliente, h):
     m = cliente.get("/api/modelos").json()
     assert m["activa"] and any(v["version"] == m["activa"] for v in m["versiones"])
     j = cliente.get("/api/metricas").json()
     assert j["categoria"]["gru"]["reales"]["f1_macro"] > 0 and j["asignacion"]["top1"] > 0
-    assert cliente.post("/api/modelos/activar", json={"version": "v999"}).status_code == 422
+    assert cliente.post("/api/modelos/activar", headers=h, json={"version": "v999"}).status_code == 422
+
+
+def test_operaciones_del_laboratorio_exigen_administrador(cliente):
+    from tests.ayudas import ANA, MARCELA, entrar
+    cuerpo_corr = {"titulo": "Mi VPN falla", "descripcion": "La VPN no conecta", "categoria_corregida": "Red", "prioridad_corregida": "Media"}
+    peticiones = [("put", "/api/tecnicos", {"cargas": {"T01": 1}}), ("post", "/api/correcciones", cuerpo_corr),
+                  ("post", "/api/modelos/activar", {"version": "v1"}), ("post", "/api/reentrenar", {"epocas": 1})]
+    for metodo, ruta, cuerpo in peticiones:
+        assert getattr(cliente, metodo)(ruta, json=cuerpo).status_code == 401, ruta
+        for cred in (ANA, MARCELA):
+            assert getattr(cliente, metodo)(ruta, json=cuerpo, headers=entrar(cliente, cred)).status_code == 403, (ruta, cred)
+    # la lectura sigue abierta (la página del laboratorio la usa sin sesión)
+    assert cliente.get("/api/tecnicos").status_code == 200 and cliente.get("/api/modelos").status_code == 200
+
+
+def test_reentrenar_exige_un_minimo_de_correcciones(cliente, h, monkeypatch):
+    monkeypatch.setenv("MIN_CORRECCIONES_REENTRENAR", "5")
+    cuerpo = {"titulo": "Mi VPN falla", "descripcion": "La VPN no conecta desde casa", "categoria_corregida": "Red", "prioridad_corregida": "Media"}
+    for _ in range(2):
+        cliente.post("/api/correcciones", headers=h, json=cuerpo)
+    r = cliente.post("/api/reentrenar", headers=h, json={"epocas": 1})
+    assert r.status_code == 422 and "al menos 5" in r.json()["detail"]
+    e = cliente.get("/api/reentrenar/estado").json()
+    assert e["minimo_correcciones"] == 5 and e["correcciones_validas"] == 2
+
+
+def test_errores_en_espanol_y_sin_500(cliente, h):
+    r = cliente.post("/api/analizar", json={"titulo": "a"})
+    assert r.status_code == 422 and any("obligatorio" in d["msg"] or "caracteres" in d["msg"] for d in r.json()["detail"])
+    assert cliente.get("/api/no-existe").json()["detail"] == "Recurso no encontrado."
+    assert cliente.delete("/api/analizar").status_code == 405
+    raros = [None, [], "texto", {"titulo": None}, {"titulo": "x" * 100000, "descripcion": "y"}, {"impacto": 3},
+             {"titulo": "<script>alert(1)</script>", "descripcion": "'; DROP TABLE tickets; --", "impacto": "Bajo", "urgencia": "Baja",
+              "usuarios_afectados": 1}, {"usuarios_afectados": -5}, {"usuarios_afectados": "muchos"}]
+    for cuerpo in raros:
+        for ruta in ("/api/analizar", "/api/similares", "/api/tickets", "/api/auth/login"):
+            r = cliente.post(ruta, json=cuerpo, headers=h)
+            assert r.status_code < 500, (ruta, cuerpo, r.status_code)
+    r = cliente.post("/api/analizar", content=b"{no es json", headers={"Content-Type": "application/json"})
+    assert r.status_code == 422
 
 
 def test_pagina_y_documentacion(cliente):
@@ -171,3 +222,15 @@ def test_registro_de_versiones(tmp_path, monkeypatch):
         registro.restaurar("v7")   # inexistente
     registro.registrar("v3", {"f1": 0.95}, 5, "publicada", activar=True)
     assert registro.cargar()["activa"] == "v3"
+
+
+def test_reentrenamiento_en_proceso_aparte(cliente, h, monkeypatch):
+    import src.service.app as app_mod
+    monkeypatch.setattr(app_mod, "MODULO_REENTRENAR", "tests.reentrenar_sustituto")
+    monkeypatch.setenv("MIN_CORRECCIONES_REENTRENAR", "1")
+    cliente.post("/api/correcciones", headers=h, json={"titulo": "Mi VPN falla", "descripcion": "La VPN no conecta desde casa",
+                                                      "categoria_corregida": "Red", "prioridad_corregida": "Media"})
+    r = cliente.post("/api/reentrenar", headers=h, json={"epocas": 1, "sincrono": True})
+    assert r.status_code == 200 and r.json()["motivo"].startswith("No mejora")
+    e = cliente.get("/api/reentrenar/estado").json()
+    assert e["estado"] == "terminado" and any("Época 1/1" in m for m in e["mensajes"])

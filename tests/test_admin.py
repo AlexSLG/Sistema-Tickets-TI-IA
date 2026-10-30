@@ -1,7 +1,7 @@
 """Pruebas de administración (fase 7): técnicos, efecto en la asignación de la IA y endpoints de modelos."""
 import pytest
 
-from tests.ayudas import ADMIN, ANA, LUIS, MARCELA, SERVIDOR, entrar, registrar
+from tests.ayudas import ADMIN, ANA, LUIS, MARCELA, MONITOR, SERVIDOR, entrar, registrar
 
 pytestmark = pytest.mark.usefixtures("bd_limpia")
 
@@ -59,3 +59,25 @@ def test_endpoints_de_modelos_siguen_disponibles(cliente):
     assert cliente.get("/api/reentrenar/estado").json()["estado"] in ("inactivo", "terminado", "error", "ejecutando")
     assert cliente.get("/api/correcciones").status_code == 200
     assert cliente.get("/laboratorio").status_code == 200 and cliente.get("/").status_code == 200
+
+
+def test_usuario_soporte_nuevo_es_tecnico_y_recibe_tickets(cliente):
+    h = entrar(cliente, ADMIN)
+    r = cliente.post("/api/usuarios", headers=h, json={"nombre": "Nuevo Técnico", "correo": "nuevo.tecnico@soporte.local",
+                                                       "contrasena": "Soporte123", "rol": "Soporte"})
+    assert r.status_code == 201, r.text
+    uid = r.json()["id"]
+    tecnicos = {t["correo"]: t for t in cliente.get("/api/admin/tecnicos", headers=h).json()}
+    nuevo = tecnicos["nuevo.tecnico@soporte.local"]
+    assert nuevo["id"] == "T09" and nuevo["disponible"] and nuevo["limite_carga"] == 8
+    # con todos los demás no disponibles, la IA le asigna el ticket (el modelo admite técnicos que no conoció al entrenar)
+    for t in tecnicos.values():
+        if t["id"] != "T09":
+            cliente.put(f"/api/admin/tecnicos/{t['id']}", headers=h, json={"disponible": False})
+    ticket = registrar(cliente, entrar(cliente, ANA), MONITOR)
+    assert ticket["tecnico"]["id"] == "T09"
+    # deja de ser Soporte → no disponible; vuelve a Soporte → disponible
+    cliente.put(f"/api/usuarios/{uid}", headers=h, json={"rol": "Usuario"})
+    assert not {t["id"]: t for t in cliente.get("/api/admin/tecnicos", headers=h).json()}["T09"]["disponible"]
+    cliente.put(f"/api/usuarios/{uid}", headers=h, json={"rol": "Soporte"})
+    assert {t["id"]: t for t in cliente.get("/api/admin/tecnicos", headers=h).json()}["T09"]["disponible"]

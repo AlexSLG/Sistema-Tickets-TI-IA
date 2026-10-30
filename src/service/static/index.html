@@ -5,13 +5,25 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light">
 <title>Laboratorio de modelos · Tickets TI</title>
-<link rel="stylesheet" href="/estatico/estilo.css?v=3">
+<link rel="stylesheet" href="/estatico/estilo.css?v=4">
 </head>
 <body>
 <header class="barra">
   <div class="marca"><span class="logo" aria-hidden="true">◈</span><div><strong>Laboratorio de modelos</strong><small>Sistema de tickets TI con IA · Sprint 1 · página de prueba</small></div></div>
+  <div class="sesion-lab" id="sesion-lab"></div>
   <div class="estado" id="estado-modelo" title="Versión activa de los modelos">Conectando…</div>
 </header>
+
+<dialog id="dlg-login" aria-labelledby="titulo-login">
+  <form id="form-login">
+    <h2 id="titulo-login">Entrar como Administrador</h2>
+    <p class="ayuda">Cambiar cargas, guardar correcciones, reentrenar o restaurar versiones requiere una cuenta de Administrador.</p>
+    <label>Correo <input id="l-correo" type="email" autocomplete="username" required></label>
+    <label>Contraseña <input id="l-contrasena" type="password" autocomplete="current-password" required></label>
+    <p id="msg-login" class="mensaje" role="status"></p>
+    <div class="acciones"><button type="submit" class="primario">Entrar</button> <button type="button" class="secundario" id="btn-cancelar-login">Cancelar</button></div>
+  </form>
+</dialog>
 
 <nav class="pestanas" role="tablist" aria-label="Secciones">
   <button role="tab" aria-selected="true" aria-controls="p-analizar" id="t-analizar" class="activa">1 · Analizar ticket</button>
@@ -103,6 +115,6 @@
   </div>
 </section>
 </main>
-<script src="/estatico/app.js?v=3"></script>
+<script src="/estatico/app.js?v=4"></script>
 </body>
 </html>

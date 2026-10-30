@@ -78,3 +78,9 @@ button:disabled { opacity: .55; cursor: wait; }
 .dos-col { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 20px; }
 a { color: var(--primario); }
 @media (max-width: 560px) { .fila3 { grid-template-columns: 1fr; } .rejilla.dos { grid-template-columns: 1fr; } .carga { width: 100px; } .barra-p { grid-template-columns: 74px 1fr 48px; } }
+/* sesión del laboratorio (Sprint 3) */
+.sesion-lab { display: flex; gap: 8px; align-items: center; font-size: 13px; color: var(--suave); margin-left: auto; }
+.sesion-lab button { padding: 4px 10px; font-size: 13px; }
+dialog#dlg-login { border: 1px solid var(--borde); border-radius: 12px; padding: 20px 22px; width: min(400px, calc(100vw - 32px)); background: var(--tarjeta); color: var(--texto); }
+dialog#dlg-login::backdrop { background: rgba(20, 30, 45, .35); }
+dialog#dlg-login h2 { margin: 0 0 8px; font-size: 18px; }

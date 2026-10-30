@@ -28,6 +28,7 @@ def contexto_tecnicos(db: Session):
         "limites": {t.id: t.limite_carga for t in tecnicos},
         "aptitudes": {t.id: t.aptitudes for t in tecnicos},
         "no_disponibles": [t.id for t in tecnicos if not t.disponible],
+        "info": {t.id: {"nombre": t.nombre, "area": t.area} for t in tecnicos},
     }
 
 

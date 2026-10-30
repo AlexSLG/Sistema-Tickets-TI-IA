@@ -1,6 +1,6 @@
 """Prueba de humo del flujo principal contra un servidor en marcha (local o Docker). Sigue el guion de demostración.
 
-    python scripts/prueba_humo.py [http://localhost:8000]
+    python scripts/prueba_humo.py [http://localhost:8001]
 
 Deja tickets nuevos en la base de datos (no borra nada); al terminar restablece la disponibilidad del técnico que modifica.
 """
@@ -8,7 +8,7 @@ import sys
 
 import httpx
 
-BASE = sys.argv[1] if len(sys.argv) > 1 else "http://localhost:8000"
+BASE = sys.argv[1] if len(sys.argv) > 1 else "http://localhost:8001"
 c = httpx.Client(base_url=BASE, timeout=60)
 
 

@@ -18,7 +18,7 @@ import pandas as pd
 import torch
 
 from src.models.base import entrenar_base
-from src.models.comun import CATEGORIAS, PRIORIDADES, PROCESSED, RAIZ, Vocabulario, cargar_split, guardar_json, texto_ticket
+from src.models.comun import CATEGORIAS, PRIORIDADES, PROCESSED, RAIZ, Vocabulario, cargar_split, guardar_json, metricas, texto_ticket
 from src.models.gru_clasificador import entrenar_gru, predecir
 from src.training import entrenar_asignacion, entrenar_clasificador, entrenar_prioridad, entrenar_similitud, registro
 from src.training.entrenar_prioridad import cargar_gru
@@ -30,10 +30,11 @@ PERFIL_PRIORIDAD = {"Baja": ("Bajo", "Media", 1), "Media": ("Medio", "Media", 10
 PESO_CORRECCIONES = 3  # cada corrección se repite 3 veces en el entrenamiento (son pocas frente a miles de tickets)
 
 
-def leer_correcciones():
-    if not CORRECCIONES.exists():
+def leer_correcciones(ruta=None):
+    ruta = Path(ruta) if ruta else CORRECCIONES
+    if not ruta.exists():
         return pd.DataFrame(columns=COLUMNAS)
-    df = pd.read_csv(CORRECCIONES, keep_default_na=False)
+    df = pd.read_csv(ruta, keep_default_na=False)
     for c in COLUMNAS:
         if c not in df.columns:
             df[c] = ""
@@ -74,6 +75,21 @@ def historial_con_correcciones(corr, tecnicos):
     return pd.concat([h, pd.DataFrame(filas)], ignore_index=True) if filas else h
 
 
+def contar_correcciones_validas(ruta=None):
+    """Correcciones con categoría y prioridad válidas (las que puede usar el reentrenamiento)."""
+    return len(correcciones_a_tickets(leer_correcciones(ruta), repeticiones=1))
+
+
+def metricas_conjunto(vocab, gru, df):
+    """F1 macro y exactitud de categoría de un modelo sobre un conjunto cualquiera (p. ej. el del equipo)."""
+    X, L = vocab.matriz(texto_ticket(df))
+    pred = predecir(gru, X, L)[0].argmax(1).numpy()
+    y = df["categoria"].map({c: i for i, c in enumerate(CATEGORIAS)}).to_numpy()
+    m = metricas(y, pred, CATEGORIAS)
+    return {"f1_macro": m["f1_macro"], "exactitud": m["exactitud"], "n": int(len(df)),
+            "predicciones": [CATEGORIAS[i] for i in pred]}
+
+
 def f1_en_referencia(vocab, gru, test):
     X, L = vocab.matriz(texto_ticket(test))
     logits, _ = predecir(gru, X, L)
@@ -82,13 +98,16 @@ def f1_en_referencia(vocab, gru, test):
     return entrenar_clasificador.evaluar_por_subconjuntos(y, pred, test)
 
 
-def reentrenar(epocas=6, lr=5e-4, desde_cero=False, progreso=print):
+def reentrenar(epocas=6, lr=5e-4, desde_cero=False, progreso=print, ruta_correcciones=None, evaluaciones_extra=None):
+    """`ruta_correcciones`: archivo de correcciones (por defecto data/correcciones.csv). `evaluaciones_extra`: {nombre: DataFrame}
+    con conjuntos adicionales en los que medir la versión vigente y la nueva antes de decidir (p. ej. las mitades del conjunto
+    del equipo); la decisión de publicar sigue dependiendo solo del conjunto de referencia (test.csv)."""
     t0 = time.time()
     reg = registro.cargar()
     vig = registro.version_activa(reg)
     if vig is None:
         raise RuntimeError("No hay una versión activa en models/registry.json: ejecuta primero entrenar_todo.")
-    corr = leer_correcciones()
+    corr = leer_correcciones(ruta_correcciones)
     tickets_corr = correcciones_a_tickets(corr)
     if tickets_corr.empty:
         return {"publicada": False, "motivo": "No hay correcciones válidas en data/correcciones.csv (se necesitan categoría y prioridad corregidas).",
@@ -120,7 +139,12 @@ def reentrenar(epocas=6, lr=5e-4, desde_cero=False, progreso=print):
         ref_nueva = f1_en_referencia(vocab, modelo, test)
         f1_nueva = ref_nueva["reales"]["f1_macro"]
         publicar = f1_nueva >= f1_vig
+        extra = {}
+        for nombre, df_extra in (evaluaciones_extra or {}).items():
+            extra[nombre] = {"vigente": metricas_conjunto(vocab_v, gru_v, df_extra), "nueva": metricas_conjunto(vocab, modelo, df_extra)}
+            progreso(f"{nombre}: F1 macro vigente {extra[nombre]['vigente']['f1_macro']:.4f} → nueva {extra[nombre]['nueva']['f1_macro']:.4f}")
         comparacion = {"vigente": {"version": vig["version"], "f1_macro": f1_vig}, "nueva": {"version": version, "f1_macro": f1_nueva},
+                       "evaluaciones_extra": extra,
                        "diferencia": f1_nueva - f1_vig, "n_correcciones": n_validas, "referencia": "test.csv (tickets reales)",
                        "recall_por_clase_vigente": {c: ref_vig["reales"]["por_clase"][c]["recall"] for c in CATEGORIAS},
                        "recall_por_clase_nueva": {c: ref_nueva["reales"]["por_clase"][c]["recall"] for c in CATEGORIAS}}
@@ -168,9 +192,13 @@ def main():
     ap.add_argument("--epocas", type=int, default=6)
     ap.add_argument("--lr", type=float, default=5e-4)
     ap.add_argument("--desde-cero", action="store_true")
+    ap.add_argument("--correcciones", default=None, help="archivo de correcciones (por defecto data/correcciones.csv)")
+    ap.add_argument("--salida-json", default=None, help="guarda el resultado completo en este archivo (lo usa la API)")
     a = ap.parse_args()
-    r = reentrenar(a.epocas, a.lr, a.desde_cero)
-    print(json.dumps({k: v for k, v in r.items() if not k.startswith("recall")}, ensure_ascii=False, indent=2))
+    r = reentrenar(a.epocas, a.lr, a.desde_cero, progreso=lambda m: print(m, flush=True), ruta_correcciones=a.correcciones)
+    if a.salida_json:
+        Path(a.salida_json).write_text(json.dumps(r, ensure_ascii=False, default=float), encoding="utf-8")
+    print(json.dumps({k: v for k, v in r.items() if not k.startswith("recall") and k != "evaluaciones_extra"}, ensure_ascii=False, indent=2, default=float))
 
 
 if __name__ == "__main__":

@@ -24,3 +24,8 @@ def horas_expiracion():
 def semilla_automatica():
     """Si es verdadero, al iniciar con la BD vacía se cargan los datos de demostración."""
     return os.getenv("SEMILLA_AUTOMATICA", "1") != "0"
+
+
+def minimo_correcciones():
+    """Correcciones válidas necesarias para permitir un reentrenamiento (pocas no mueven el modelo)."""
+    return int(os.getenv("MIN_CORRECCIONES_REENTRENAR", "5"))

@@ -1,18 +1,19 @@
 # Sistema de tickets TI con IA: aplicación + PostgreSQL 16.
-#   docker compose up --build      ->  http://localhost:8001
+#   copy .env.ejemplo .env         (opcional: claves, puerto y base de datos propios; sin .env se usan los valores por defecto)
+#   docker compose up -d --build   ->  http://localhost:8001  (o el PUERTO_APP de .env)
 #   docker compose down            (conserva los datos)      docker compose down -v   (borra la base de datos)
 services:
   db:
     image: postgres:16-alpine
     environment:
-      POSTGRES_USER: tickets
-      POSTGRES_PASSWORD: tickets
-      POSTGRES_DB: tickets
+      POSTGRES_USER: ${POSTGRES_USER:-tickets}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-tickets}
+      POSTGRES_DB: ${POSTGRES_DB:-tickets}
     restart: unless-stopped
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U tickets -d tickets"]
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -23,10 +24,12 @@ services:
       db:
         condition: service_healthy
     environment:
-      DATABASE_URL: postgresql+psycopg://tickets:tickets@db:5432/tickets
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-tickets}:${POSTGRES_PASSWORD:-tickets}@db:5432/${POSTGRES_DB:-tickets}
       SECRETO_JWT: ${SECRETO_JWT:-cambia-esta-clave-en-produccion-sprint3}
+      MIN_CORRECCIONES_REENTRENAR: ${MIN_CORRECCIONES_REENTRENAR:-5}
+      HORAS_EXPIRACION_TOKEN: ${HORAS_EXPIRACION_TOKEN:-8}
     ports:
-      - "${PUERTO_APP:-8001}:8000"   # puerto del equipo (8001 por defecto; el 8000 lo usa otro servicio). Cambiar con PUERTO_APP
+      - "${PUERTO_APP:-8001}:8000"   # puerto publicado en el servidor (8001 por defecto; el 8000 lo usa otro servicio del equipo)
     volumes:
       - ./models:/app/models   # versiones de modelos y registry.json: el reentrenamiento persiste
       - ./data:/app/data       # data/processed y data/correcciones.csv: las correcciones persisten
