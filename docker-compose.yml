@@ -1,5 +1,5 @@
 # Sistema de tickets TI con IA: aplicación + PostgreSQL 16.
-#   docker compose up --build      ->  http://localhost:8000
+#   docker compose up --build      ->  http://localhost:8001
 #   docker compose down            (conserva los datos)      docker compose down -v   (borra la base de datos)
 services:
   db:
@@ -26,7 +26,7 @@ services:
       DATABASE_URL: postgresql+psycopg://tickets:tickets@db:5432/tickets
       SECRETO_JWT: ${SECRETO_JWT:-cambia-esta-clave-en-produccion-sprint3}
     ports:
-      - "${PUERTO_APP:-8000}:8000"   # si el 8000 está ocupado: PUERTO_APP=8001 docker compose up -d
+      - "${PUERTO_APP:-8001}:8000"   # puerto del equipo (8001 por defecto; el 8000 lo usa otro servicio). Cambiar con PUERTO_APP
     volumes:
       - ./models:/app/models   # versiones de modelos y registry.json: el reentrenamiento persiste
       - ./data:/app/data       # data/processed y data/correcciones.csv: las correcciones persisten
