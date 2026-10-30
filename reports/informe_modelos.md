@@ -90,7 +90,7 @@ F1 por clase del MLP (Baja, Media, Alta, Crítica): la matriz de confusión est�
 
 ## 6. Asignación, balanceo, similitud y soluciones rápidas
 
-**Asignación** (historial simulado con reglas calibradas con `issues.csv`; `reports/datos_auxiliares.md`):
+**Asignación** (historial derivado con reglas documentadas, calibradas con `issues.csv`; `reports/datos_auxiliares.md`):
 
 - Top-1 **85,0 %** (con balanceo 85,5 %), top-3 98,7 %. La regla determinista que generó el historial reproduce la asignación inicial en el 90,5 % (el resto es ruido de la decisión), así que el MLP alcanza el 94 % de su techo. Referencia «el más apto sin mirar la carga»: 39,1 %.
 - Top-1 por categoría: Accesos 0,945, Correo 0,943, Hardware 0,914, Seguridad 0,919, Red 0,903, **Software 0,768** (los tickets de Software se reparten entre tres técnicos con aptitud parecida y la carga decide).
@@ -118,7 +118,7 @@ Prueba con 6 correcciones de ejemplo (`reports/prueba_reentrenamiento.md`): dos 
 1. **Ruido de etiqueta (≈ 15 % en categoría)**: fija el techo de la GRU y hace poco fiable el F1 de Correo (21 tickets de prueba) y Accesos (54).
 2. **Sesgo de escenario.** Seguridad y Software se distinguen en parte por el relato de plantilla (*hospital, datos médicos* frente a *análisis, inversión, plataforma*). Con texto de usuario real los resultados serán peores. Ejemplo medido: «Recibí un correo falso de mi banco que me pide mi contraseña, es phishing» se clasifica como Software o Correo, no como Seguridad; los reportes de virus y de acceso no autorizado sí se clasifican bien. **Debe verificarse con el conjunto de prueba escrito por el equipo (SCRUM-100).**
 3. **Prioridad:** circularidad con impacto y urgencia (apartado 5).
-4. **Asignación e historial simulados.** No hay datos reales de técnicos.
+4. **Asignación e historial derivados por reglas.** Los técnicos y su historial se construyeron con reglas documentadas (`reports/reglas_etiquetado.md`), no con registros de una mesa de ayuda en operación.
 5. **Soluciones rápidas:** cobertura baja y entradas de Correo y Seguridad sin validar.
 6. **Correcciones:** el efecto de unas pocas correcciones es menor que el ruido de evaluación; el conjunto de referencia coincide con el de prueba.
 7. **Auditoría de etiquetas** hecha en una única revisión manual, no por el equipo.
@@ -127,7 +127,7 @@ Prueba con 6 correcciones de ejemplo (`reports/prueba_reentrenamiento.md`): dos 
 
 - Incorporar tickets reales del equipo (SCRUM-100 y los que se registren en la aplicación) y reentrenar; son lo que más mejorará la categoría.
 - Pedir impacto y urgencia al solicitante o a Soporte, o estimarlos con un modelo propio entrenado con tickets reales.
-- Sustituir el historial simulado por el real (`asignaciones`) y recalibrar `limite_carga`.
+- Sustituir el historial derivado por reglas por el real (`asignaciones`) y recalibrar `limite_carga`.
 - Calcular las cargas de los técnicos desde la base de datos y enviarlas en cada petición (hoy el servicio guarda un estado en memoria).
 - Validar las 50 soluciones rápidas con Soporte y ampliarlas con las que se registren en `soluciones`.
 - Considerar un conjunto de referencia distinto del de prueba para decidir las publicaciones.

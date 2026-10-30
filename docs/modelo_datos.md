@@ -1,205 +1,135 @@
-# Modelo de datos (Sprint 2)
+# Modelo de datos
 
-Diseño de la base de datos de la aplicación web (FastAPI + PostgreSQL con la extensión `pgvector`). Parte de los datos y modelos del Sprint 1:
-las categorías, prioridades, impacto y urgencia son los de `reports/reglas_etiquetado.md`; los técnicos, aptitudes, historial y soluciones rápidas tienen el formato de `data/processed/`;
-las versiones de modelos corresponden a `models/registry.json`.
+Base de datos de la aplicación (SQLAlchemy 2; **SQLite** en local, **PostgreSQL 16** en Docker; los tipos son portables entre ambos). Definición en `src/sistema/modelos.py`; las tablas se crean al arrancar (`src/sistema/db.py`). Algunos datos viven en archivos, no en la BD, porque los comparten el servicio de inferencia, el laboratorio y el entrenamiento (sección 3).
 
-## Diagrama entidad-relación
+> El diseño inicial del Sprint 2 preveía tablas separadas para roles, aptitudes, asignaciones y soluciones, y `pgvector` para los embeddings. Se simplificó: roles y aptitudes como columnas, asignaciones y cambios de estado en `historial`, y la búsqueda de similares en memoria con los índices de la versión de modelos (≈ 7 500 tickets, < 30 ms).
+
+## 1. Diagrama entidad-relación
 
 ```mermaid
 erDiagram
-    ROLES ||--o{ USUARIOS : "tiene"
-    USUARIOS ||--o| TECNICOS : "puede ser"
-    USUARIOS ||--o{ TICKETS : "crea"
-    USUARIOS ||--o{ COMENTARIOS : "escribe"
-    USUARIOS ||--o{ CORRECCIONES : "registra"
-    CATEGORIAS ||--o{ TICKETS : "clasifica"
-    CATEGORIAS ||--o{ APTITUDES : "evalúa"
-    CATEGORIAS ||--o{ SOLUCIONES_RAPIDAS : "agrupa"
-    TECNICOS ||--o{ APTITUDES : "tiene"
-    TECNICOS ||--o{ TICKETS : "atiende"
-    TECNICOS ||--o{ ASIGNACIONES : "recibe"
-    TICKETS ||--o{ COMENTARIOS : "tiene"
-    TICKETS ||--o{ HISTORIAL_ESTADOS : "registra"
-    TICKETS ||--o{ ASIGNACIONES : "se asigna"
-    TICKETS ||--o{ SOLUCIONES : "se resuelve con"
-    TICKETS ||--o{ CORRECCIONES : "se corrige"
-    TICKETS ||--o| ANALISIS_IA : "se analiza"
-    SOLUCIONES_RAPIDAS ||--|{ FRASES_SOLUCION_RAPIDA : "se describe con"
-    SOLUCIONES_RAPIDAS ||--o{ ANALISIS_IA : "se sugiere en"
-    VERSIONES_MODELOS ||--o{ ANALISIS_IA : "genera"
-    VERSIONES_MODELOS ||--o{ CORRECCIONES : "usada en"
-
-    ROLES {
-        smallint id PK
-        text nombre UK "Usuario | Soporte | Administrador"
+    usuarios ||--o| tecnicos : "rol Soporte"
+    usuarios ||--o{ tickets : "solicita"
+    tecnicos ||--o{ tickets : "atiende"
+    tickets ||--|| analisis_ia : "análisis de la IA"
+    tickets ||--o{ comentarios : ""
+    tickets ||--o{ historial : ""
+    tickets ||--o{ correcciones : ""
+    usuarios ||--o{ comentarios : "escribe"
+    usuarios ||--o{ correcciones : "corrige"
+    usuarios {
+        string id PK
+        string nombre
+        string correo UK
+        string contrasena_hash
+        string rol
+        bool activo
+        datetime creado_en
     }
-    USUARIOS {
-        uuid id PK
-        text nombre
-        text correo UK
-        text contrasena_hash
-        smallint rol_id FK
-        boolean activo
-        timestamptz creado_en
+    tecnicos {
+        string id PK "T01…"
+        string usuario_id FK,UK
+        string nombre
+        string area
+        int limite_carga
+        bool disponible
+        json aptitudes
     }
-    TECNICOS {
-        uuid usuario_id PK, FK
-        text codigo UK "T01…"
-        text area
-        smallint limite_carga "tickets abiertos simultáneos"
-        boolean disponible
-    }
-    CATEGORIAS {
-        smallint id PK
-        text nombre UK "Hardware | Software | Red | Accesos | Correo | Seguridad"
-    }
-    APTITUDES {
-        uuid tecnico_id PK, FK
-        smallint categoria_id PK, FK
-        smallint nivel "1 a 5"
-    }
-    TICKETS {
-        uuid id PK
-        text titulo
+    tickets {
+        string id PK
+        string codigo UK "TK-0001…"
+        string titulo
         text descripcion
-        uuid solicitante_id FK
-        uuid tecnico_id FK "asignado actual"
-        smallint categoria_id FK "vigente (IA o corregida)"
-        text prioridad "Baja | Media | Alta | Crítica"
-        text impacto "Bajo | Medio | Alto"
-        text urgencia "Baja | Media | Alta"
-        integer usuarios_afectados
-        text estado "Abierto | En progreso | En espera | Resuelto | Cerrado"
-        timestamptz creado_en
-        timestamptz resuelto_en
-        vector embedding "vector(512) de la GRU"
+        string impacto
+        string urgencia
+        int usuarios_afectados
+        string solicitante_id FK
+        string tecnico_id FK
+        string categoria
+        string prioridad
+        string estado
+        bool resuelto_con_solucion_rapida
+        text solucion
+        datetime creado_en
+        datetime actualizado_en
+        datetime resuelto_en
+        datetime cerrado_en
     }
-    ANALISIS_IA {
-        uuid ticket_id PK, FK
-        smallint version_id FK
-        smallint categoria_id FK
-        jsonb prob_categoria
-        text prioridad
-        jsonb prob_prioridad
-        jsonb tecnicos_sugeridos "orden, puntaje, carga"
-        uuid solucion_rapida_id FK "puede ser nulo"
-        real sim_solucion_rapida
-        jsonb similares "ids y similitud"
-        integer tiempo_ms
-        timestamptz creado_en
+    analisis_ia {
+        string ticket_id PK,FK
+        string version_modelos
+        string categoria_sugerida
+        json prob_categoria
+        string prioridad_sugerida
+        json prob_prioridad
+        json tecnicos_sugeridos
+        json solucion_rapida
+        json similares
+        float tiempo_ms
     }
-    COMENTARIOS {
-        uuid id PK
-        uuid ticket_id FK
-        uuid autor_id FK
+    comentarios {
+        string id PK
+        string ticket_id FK
+        string autor_id FK
         text texto
-        boolean interno
-        timestamptz creado_en
+        datetime creado_en
     }
-    HISTORIAL_ESTADOS {
-        bigint id PK
-        uuid ticket_id FK
-        text estado_anterior
-        text estado_nuevo
-        uuid cambiado_por FK
-        timestamptz cambiado_en
+    historial {
+        string id PK
+        string ticket_id FK
+        string usuario_id FK
+        string accion
+        text detalle
+        datetime creado_en
     }
-    ASIGNACIONES {
-        bigint id PK
-        uuid ticket_id FK
-        uuid tecnico_id FK
-        integer carga_al_asignar
-        boolean reasignacion
-        text origen "ia | manual"
-        timestamptz asignado_en
-        timestamptz cerrado_en
-        real tiempo_resolucion_h
-    }
-    SOLUCIONES {
-        uuid id PK
-        uuid ticket_id FK
-        uuid autor_id FK
-        text texto
-        boolean efectiva
-        timestamptz creado_en
-    }
-    SOLUCIONES_RAPIDAS {
-        text id PK "SR-01…"
-        smallint categoria_id FK
-        text problema
-        text[] pasos
-        boolean activa
-    }
-    FRASES_SOLUCION_RAPIDA {
-        bigint id PK
-        text solucion_rapida_id FK
-        text frase
-        vector embedding "vector(512)"
-    }
-    CORRECCIONES {
-        bigint id PK
-        uuid ticket_id FK
-        uuid usuario_id FK
-        smallint categoria_anterior_id FK
-        smallint categoria_corregida_id FK
-        text prioridad_anterior
-        text prioridad_corregida
-        uuid tecnico_reasignado_id FK "puede ser nulo"
-        smallint version_id FK
-        boolean usada_en_entrenamiento
-        timestamptz creada_en
-    }
-    VERSIONES_MODELOS {
-        smallint id PK
-        text version UK "v1, v2…"
-        timestamptz fecha
-        jsonb metricas "F1 macro, recall Crítica, top-1 asignación…"
-        integer n_correcciones
-        text estado "publicada | descartada"
-        boolean activa
-        text nota
+    correcciones {
+        string id PK
+        string ticket_id FK
+        string usuario_id FK
+        string categoria_ia
+        string categoria_correcta
+        string prioridad_ia
+        string prioridad_correcta
+        string version_modelos
+        datetime creado_en
     }
 ```
 
-## Tablas
+## 2. Tablas
 
-### Usuarios y roles
-- **`roles`**: `Usuario`, `Soporte`, `Administrador`. Un usuario crea y consulta sus tickets; Soporte los atiende y corrige; Administrador gestiona usuarios, técnicos, correcciones y versiones de modelos.
-- **`usuarios`**: autenticación (la contraseña se guarda con hash, nunca en claro) y rol.
-- **`tecnicos`**: extiende a un usuario con rol Soporte. `limite_carga` es el número máximo de tickets abiertos a la vez; la **carga actual no se guarda**, se calcula: `SELECT count(*) FROM tickets WHERE tecnico_id = … AND estado NOT IN ('Resuelto','Cerrado')`.
-- **`aptitudes`**: nivel 1–5 por técnico y categoría. Restricción de negocio del Sprint 1: al menos 2 técnicos con nivel ≥ 4 por categoría (`aptitud_*` de `tecnicos.csv`).
+| Tabla | Contenido | Notas |
+|---|---|---|
+| `usuarios` | Cuentas de los tres roles (`Usuario`, `Soporte`, `Administrador`) | Contraseña con bcrypt, nunca en claro. `activo = false` impide iniciar sesión |
+| `tecnicos` | Ficha de técnico de cada usuario Soporte: área, `limite_carga`, `disponible` y `aptitudes` (`{"Hardware": 5, …}`, 1 a 5) | Se crea al crear un usuario Soporte (o al cambiarle el rol). La **carga no se guarda**: se cuenta como tickets `Abierto` o `En progreso` del técnico |
+| `tickets` | Lo que escribe el solicitante y lo vigente: `categoria`, `prioridad` (empiezan con la sugerencia de la IA y cambian si se corrigen), `tecnico_id`, `estado`, `solucion` y fechas | `codigo` correlativo `TK-0001`. Estados: Abierto → En progreso → Resuelto → Cerrado (Resuelto → En progreso al reabrir) |
+| `analisis_ia` | Respuesta completa de la IA al registrar el ticket, con la versión de modelos que la generó | Solo inserción: permite auditar y comparar versiones aunque el ticket se corrija después |
+| `comentarios` | Conversación del ticket | Visibles para el solicitante, el técnico y el Administrador |
+| `historial` | Trazabilidad: `creado`, `asignado`, `reasignado`, `estado` (incluye reaperturas), `corregido`, `solución rápida` | Solo inserción. Alimenta los tiempos de resolución del panel |
+| `correcciones` | Categoría y prioridad de la IA frente a las corregidas por Soporte | También se escriben en `data/correcciones.csv` para el reentrenamiento. El panel calcula con ellas el % de sugerencias aceptadas |
 
-### Tickets
-- **`tickets`**: los campos que el usuario escribe (`titulo`, `descripcion`, `impacto`, `urgencia`, `usuarios_afectados`) y los vigentes (`categoria_id`, `prioridad`, `tecnico_id`, `estado`). `categoria_id` y `prioridad` empiezan con lo que predijo la IA y cambian si Soporte los corrige. `prioridad` debe ser coherente con la matriz impacto × urgencia (Alto + Alta = Crítica), con excepciones permitidas. `embedding` guarda el vector de 512 dimensiones de la GRU para la búsqueda de casos similares (`CREATE INDEX … USING hnsw (embedding vector_cosine_ops)`).
-- **`analisis_ia`**: respuesta de `POST /api/analizar` para cada ticket, con la versión de los modelos que la generó (auditoría y comparación de versiones). Las probabilidades y los técnicos sugeridos van en `jsonb`.
-- **`comentarios`**: conversación del ticket; `interno = true` solo lo ve Soporte.
-- **`historial_estados`**: cada cambio de estado, quién lo hizo y cuándo (trazabilidad y tiempos de resolución).
-- **`asignaciones`**: cada asignación o reasignación de un ticket a un técnico, con la carga que tenía en ese momento y el origen (`ia` si aceptó la sugerencia, `manual` si la cambió). Es el historial que alimenta el MLP de asignación (equivalente a `historial_asignaciones.csv`).
-- **`soluciones`**: texto con el que se resolvió un ticket y si fue efectiva. Las soluciones de tickets cerrados alimentan «casos similares».
+### Reglas de integridad y de negocio
 
-### Soluciones rápidas
-- **`soluciones_rapidas`** y **`frases_solucion_rapida`**: equivalentes a `soluciones_rapidas.json` (50 entradas con 3–5 frases cada una). Los embeddings de las frases permiten buscar con pgvector; el umbral de similitud se guarda en la configuración de la versión del modelo.
+1. Valores de categoría, prioridad, impacto, urgencia, estado y rol validados en la API (esquemas Pydantic con los valores de la taxonomía).
+2. Un técnico no recibe tickets nuevos si está no disponible o en su límite mientras haya otro con capacidad (reglas de balanceo); si todos están al límite, se elige el de menor ocupación. La reasignación manual del Administrador puede superarlo y queda en `historial`.
+3. Solo el solicitante confirma o reabre; solo el técnico asignado o el Administrador cambian el estado, corrigen o reasignan.
+4. `analisis_ia` e `historial` no se modifican después de escribirse.
 
-### Aprendizaje continuo
-- **`correcciones`**: lo que Soporte cambió respecto a la IA (categoría, prioridad, técnico). Equivalen a las filas de `data/correcciones.csv`. `usada_en_entrenamiento` evita contarlas dos veces cuando se reentrena.
-- **`versiones_modelos`**: equivalente a `models/registry.json`. Solo una versión está activa. Una versión descartada (empeoraba el F1 macro) se conserva con su estado y sus métricas.
+## 3. Datos en archivos
 
-## Reglas de integridad
-1. `usuarios.rol_id` obligatorio; `tecnicos.usuario_id` solo para usuarios con rol Soporte.
-2. `tickets.categoria_id`, `prioridad`, `impacto` y `urgencia` con `CHECK` sobre los valores de la taxonomía.
-3. Un técnico no puede tener más tickets abiertos que `limite_carga`, salvo cuando **todos** estén al límite (regla de balanceo); la asignación manual puede superarlo y queda registrada como `origen = manual`.
-4. Una versión activa como máximo (`UNIQUE INDEX … WHERE activa`).
-5. `historial_estados` y `analisis_ia` son de solo inserción.
+| Archivo | Contenido | Quién lo escribe |
+|---|---|---|
+| `models/registry.json` y `models/vN/` | Versiones de los modelos (pesos, vocabulario, índices, métricas), cuál está activa y las descartadas | Entrenamiento y reentrenamiento; restauración desde la pantalla Modelos |
+| `data/processed/soluciones_rapidas.json` | Catálogo de soluciones rápidas: `id`, `categoria`, `problema`, `frases_ejemplo`, `pasos`, `activa` y, si se guardó desde un ticket, `origen`, `ticket_origen`, `creada_por`, `fecha` (HU26) | Soporte y Administrador desde la aplicación (escritura atómica). Se eligió un archivo y no una tabla porque lo leen igual el servicio, el laboratorio y el reentrenamiento; en Docker persiste en el volumen `./data` |
+| `data/correcciones.csv` | Correcciones para el reentrenamiento (`titulo, descripcion, categoria_corregida, prioridad_corregida, tecnico_reasignado, impacto, urgencia, usuarios_afectados, fecha`) | Al corregir un ticket o desde el laboratorio |
+| `data/processed/tecnicos.csv`, `historial_asignaciones.csv`, `train/val/test.csv` | Datos de entrenamiento (Sprint 1) | Scripts de `src/data/` |
 
-## Equivalencias con los datos del Sprint 1
+## 4. Equivalencias con los datos del Sprint 1
 
-| Archivo / API del Sprint 1 | Tabla del Sprint 2 |
+| Archivo / API del Sprint 1 | En el sistema |
 |---|---|
-| `tickets.csv` (`titulo`, `descripcion`, `categoria`, `prioridad`, `impacto`, `urgencia`, `usuarios_afectados`, `solucion`) | `tickets`, `soluciones` |
-| `tecnicos.csv` | `tecnicos`, `aptitudes` |
-| `historial_asignaciones.csv` | `asignaciones` |
-| `soluciones_rapidas.json` | `soluciones_rapidas`, `frases_solucion_rapida` |
-| `data/correcciones.csv` | `correcciones` |
-| `models/registry.json` | `versiones_modelos` |
-| respuesta de `POST /api/analizar` | `analisis_ia` (+ `tickets.embedding`) |
+| `tecnicos.csv` | `tecnicos` (semilla) |
+| respuesta de `POST /api/analizar` | `analisis_ia` |
+| `data/correcciones.csv` | `correcciones` (+ el mismo CSV) |
+| `soluciones_rapidas.json` | el mismo archivo, ahora administrable |
+| `models/registry.json` | el mismo archivo (pantalla Modelos de IA) |
+| `test.csv` (tickets reales) | textos de los 60 tickets de demostración (`src/sistema/semilla_historial.py`) |

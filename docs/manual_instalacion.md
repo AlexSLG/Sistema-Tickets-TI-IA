@@ -82,7 +82,13 @@ La semilla crea el Administrador, 3 usuarios, 8 técnicos (usuarios Soporte) y 6
 3. Prueba de humo completa (requiere Python con `httpx`): `python scripts/prueba_humo.py http://localhost:8001` → «Prueba de humo correcta.»
 4. Rendimiento (opcional): `python scripts/medir_rendimiento.py http://localhost:8001`.
 
-## 8. Solución de errores frecuentes
+## 8. Copias de seguridad
+
+- Base de datos (Docker): `docker compose exec db pg_dump -U tickets tickets > respaldo_tickets.sql`. Restaurar: `docker compose exec -T db psql -U tickets tickets < respaldo_tickets.sql` (usar el usuario y la base de `.env`).
+- Modelos y archivos de datos: copiar las carpetas `models/` y `data/` (contienen las versiones reentrenadas, las correcciones y el catálogo de soluciones rápidas).
+- Sin Docker: copiar `data/app.db` con la aplicación detenida.
+
+## 9. Solución de errores frecuentes
 
 | Síntoma | Causa y solución |
 |---|---|
