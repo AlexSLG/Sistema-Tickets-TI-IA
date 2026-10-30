@@ -1,6 +1,6 @@
 # Pendientes finales y trabajo futuro
 
-Reemplaza a `PENDIENTES_SPRINT3.md` (cerrado). Lo resuelto en el Sprint 3 está en `reports/resultados_pruebas.md` y `reports/aceptacion_final.md`.
+Reemplaza a la lista de pendientes del Sprint 2. Lo resuelto en el Sprint 3 está en `reports/resultados_pruebas.md` y `reports/aceptacion_final.md`.
 
 ## 1. Pendiente para completar la entrega (requiere al equipo)
 

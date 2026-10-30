@@ -6,7 +6,7 @@ El proyecto siguió las seis fases de CRISP-ML(Q) (*Cross-Industry Standard Proc
 
 | # | Fase | Sprint | Evidencia principal | Estado |
 |---|---|---|---|---|
-| 1 | Comprensión del negocio y de los datos | 1 | `reports/inventario_fuentes.md`, `reports/eda.md`, `PLAN_SPRINT1.md` (criterios de éxito) | Completa |
+| 1 | Comprensión del negocio y de los datos | 1 | `reports/inventario_fuentes.md`, `reports/eda.md`, `reports/informe_modelos.md` §1 (criterios de éxito) | Completa |
 | 2 | Preparación de datos | 1 | `reports/*_resumen.md`, `reglas_etiquetado.md`, `calidad_traduccion.md`, `auditoria_etiquetas.md`, `tests/test_datos.py` | Completa |
 | 3 | Modelado | 1 | `reports/informe_modelos.md` (§3–6), `comparacion_gru.json`, `src/models/`, `src/training/` | Completa |
 | 4 | Evaluación | 1 y 3 | `reports/informe_modelos.md`, `metricas.json`, `bootstrap_gru_vs_base.json`; conjunto del equipo: `data/prueba_equipo/`, `src/training/evaluar_prueba_equipo.py` | Completa en `test.csv`; **validación con el conjunto del equipo pendiente de sus tickets** |
@@ -19,7 +19,7 @@ El proyecto siguió las seis fases de CRISP-ML(Q) (*Cross-Industry Standard Proc
 
 **Objetivo.** Reducir el tiempo de atención de una mesa de ayuda TI: clasificar y priorizar automáticamente los tickets escritos en español, sugerir el técnico adecuado sin saturar a nadie, resolver los problemas comunes con autoservicio y aprender de las correcciones de Soporte.
 
-**Criterios de éxito definidos antes de entrenar** (`PLAN_SPRINT1.md`): F1 macro de categoría ≥ 0,85 y mejor que un modelo base; F1 macro de prioridad ≥ 0,80 con recall de Crítica ≥ 0,85; técnico esperado en primer lugar ≥ 80 %; ningún técnico por encima de su límite si hay otro disponible; ≥ 3 de 5 casos similares de la misma categoría; respuesta < 2 s en CPU; aprendizaje continuo sin regresiones.
+**Criterios de éxito definidos antes de entrenar** (plan del Sprint 1; resultados frente a ellos en `reports/informe_modelos.md` §1): F1 macro de categoría ≥ 0,85 y mejor que un modelo base; F1 macro de prioridad ≥ 0,80 con recall de Crítica ≥ 0,85; técnico esperado en primer lugar ≥ 80 %; ningún técnico por encima de su límite si hay otro disponible; ≥ 3 de 5 casos similares de la misma categoría; respuesta < 2 s en CPU; aprendizaje continuo sin regresiones.
 
 **Restricciones.** Solo MLP, CNN, RNN, LSTM, GRU y Autoencoder (sin transformers ni modelos de lenguaje preentrenados en el sistema); CPU; instalación en un servidor local; todo en español.
 
