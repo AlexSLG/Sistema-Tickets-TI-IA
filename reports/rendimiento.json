@@ -1,0 +1,27 @@
+{
+  "version_modelos": "v1",
+  "analizar": {
+    "n": 100,
+    "mediana_s": 0.02175954999984242,
+    "p95_s": 0.03085450001817662,
+    "max_s": 0.035101499990560114,
+    "media_s": 0.022315365998656488,
+    "cumple": true
+  },
+  "registrar": {
+    "n": 50,
+    "mediana_s": 0.0323047999991104,
+    "p95_s": 0.04450156999228056,
+    "max_s": 0.048526400001719594,
+    "media_s": 0.034018697998253626,
+    "cumple": true
+  },
+  "ia_interna_ms": {
+    "mediana": 16.188899986445904,
+    "p95": 24.51877001440152
+  },
+  "base": "http://localhost:8002",
+  "entorno": "local, uvicorn + SQLite",
+  "fecha": "2026-10-30 08:49",
+  "equipo": "Windows 10, AMD64 Family 25 Model 68 Stepping 1, AuthenticAMD, 16 hilos"
+}

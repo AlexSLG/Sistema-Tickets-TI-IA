@@ -165,3 +165,15 @@ def test_reasignacion_manual_y_automatica(cliente):
     assert cliente.post(url, headers=hd, json={"tecnico_id": "T03"}).status_code == 403
     assert cliente.post(url, headers=hd, json={}).json()["tecnico"]["id"] != destino
     assert cliente.post(url, headers=entrar(cliente, ANA), json={}).status_code == 403
+
+
+def test_registro_de_ticket_menor_a_2_segundos(cliente):
+    import time
+    h = entrar(cliente, ANA)
+    registrar(cliente, h, MONITOR)  # calentamiento
+    tiempos = []
+    for datos in (SERVIDOR, CORREO_CLAVE, MONITOR, SERVIDOR, CORREO_CLAVE):
+        t0 = time.perf_counter()
+        registrar(cliente, h, datos)
+        tiempos.append(time.perf_counter() - t0)
+    assert max(tiempos) < 2.0, tiempos
