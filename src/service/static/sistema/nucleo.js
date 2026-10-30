@@ -113,8 +113,9 @@ async function navegar() {
   const nombre = ruta === "ticket" ? "ticket" : permitidas.includes(ruta) ? ruta : permitidas[0];
   document.querySelectorAll(".lateral a[data-ruta]").forEach((a) => a.classList.toggle("activo", a.dataset.ruta === nombre ||
     (nombre === "ticket" && a.dataset.ruta === (sesion.usuario.rol === "Usuario" ? "mis-tickets" : sesion.usuario.rol === "Soporte" ? "bandeja" : "tickets"))));
-  const cont = document.getElementById("contenido");
-  cont.replaceChildren(el("p", { class: "suave", texto: "Cargando…" }));
+  // cada navegación pinta en su propio contenedor: si una vista lenta termina después de cambiar de pantalla, no pisa la nueva
+  const cont = el("div", { class: "vista" }, el("p", { class: "suave", texto: "Cargando…" }));
+  document.getElementById("contenido").replaceChildren(cont);
   try { await VISTAS[nombre](cont, param); }
   catch (e) { cont.replaceChildren(el("div", { class: "tarjeta" }, el("h2", { texto: "No se pudo cargar" }), el("p", { class: "mensaje error", texto: e.message }))); }
 }
