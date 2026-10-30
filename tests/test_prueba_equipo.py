@@ -47,3 +47,20 @@ def test_prioridad_segun_la_matriz_y_avisos_de_cobertura():
     assert vpe.prioridad_matriz("Medio", "Media") == "Media" and vpe.prioridad_matriz("Alto", "Media") == "Alta"
     _, inf = vpe.validar(tabla({"prioridad": "Crítica"}))
     assert any("matriz" in a for a in inf["avisos"]) and any("mínimo acordado" in a for a in inf["avisos"])
+
+
+def test_ciclo_aprendizaje_division_y_correcciones(tmp_path):
+    from src.training import ciclo_aprendizaje as ca
+    from src.training.reentrenar import contar_correcciones_validas, leer_correcciones
+    cats = ["Hardware", "Software", "Red", "Accesos", "Correo", "Seguridad"]
+    df = pd.DataFrame([{"id": f"E{i}", "titulo": f"Problema {i}", "descripcion": f"Descripción del problema número {i}", "impacto": "Medio",
+                        "urgencia": "Media", "usuarios_afectados": 1, "categoria": cats[i % 6], "prioridad": "Media", "autor": "x"} for i in range(24)])
+    A, B = ca.dividir(df)
+    assert len(A) == len(B) == 12 and not set(A["id"]) & set(B["id"])
+    assert A["categoria"].value_counts().to_dict() == B["categoria"].value_counts().to_dict()
+    assert ca.dividir(df)[0]["id"].tolist() == A["id"].tolist()  # reproducible
+    ruta = ca.a_correcciones(A, tmp_path / "c.csv")
+    assert contar_correcciones_validas(ruta) == 12
+    mala = leer_correcciones(ca.a_correcciones(A, tmp_path / "m.csv", cambiar_categoria=True))
+    assert (mala["categoria_corregida"].to_numpy() != A["categoria"].to_numpy()).all()
+    assert ca.reproduccion(A, A["categoria"].tolist()) == 1.0
