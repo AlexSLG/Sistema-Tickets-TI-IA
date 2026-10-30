@@ -94,3 +94,20 @@ class CorregirEntrada(BaseModel):
 
 class ReasignarEntrada(BaseModel):
     tecnico_id: Optional[str] = None  # sin valor: reasignación automática
+
+
+# ------------------------------------------------------------------ soluciones rápidas (HU26)
+class SolucionCrear(BaseModel):
+    problema: str = Field(..., min_length=5, max_length=200)
+    categoria: Categoria
+    frases_ejemplo: List[str] = Field(..., min_length=1, max_length=20, description="Frases con las que un usuario describiría el problema")
+    pasos: List[str] = Field(..., min_length=1, max_length=15)
+    ticket_id: Optional[str] = Field(None, description="Ticket Resuelto o Cerrado del que se toma la solución")
+
+
+class SolucionActualizar(BaseModel):
+    problema: Optional[str] = Field(None, min_length=5, max_length=200)
+    categoria: Optional[Categoria] = None
+    frases_ejemplo: Optional[List[str]] = Field(None, min_length=1, max_length=20)
+    pasos: Optional[List[str]] = Field(None, min_length=1, max_length=15)
+    activa: Optional[bool] = None

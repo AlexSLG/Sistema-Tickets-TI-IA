@@ -7,6 +7,7 @@ import argparse
 import json
 from pathlib import Path
 
+from src.models import catalogo_soluciones
 from src.models.comun import PROCESSED, RAIZ, cargar_split, guardar_json
 from src.training import entrenar_asignacion, entrenar_clasificador, entrenar_prioridad, entrenar_similitud, registro
 
@@ -25,7 +26,7 @@ def entrenar_todo(version, reutilizar_gru=False, epocas=40, nota="", activar=Tru
     print(f"[{version}] 3/4 MLP de asignación")
     entrenar_asignacion.entrenar_y_evaluar(d)
     print(f"[{version}] 4/4 similitud y soluciones rápidas")
-    soluciones = json.loads((PROCESSED / "soluciones_rapidas.json").read_text(encoding="utf-8"))
+    soluciones = catalogo_soluciones.activas(catalogo_soluciones.leer())
     entrenar_similitud.construir_y_evaluar(d, train, val, soluciones)
     cfg_ruta = d / "config.json"
     cfg = json.loads(cfg_ruta.read_text(encoding="utf-8")) if cfg_ruta.exists() else {}

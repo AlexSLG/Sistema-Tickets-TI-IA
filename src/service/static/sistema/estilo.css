@@ -95,3 +95,8 @@ details summary { cursor: pointer; color: var(--primario); font-size: 13px; }
   .estructura { grid-template-columns: 1fr; } .lateral { flex-direction: row; flex-wrap: wrap; align-items: center; padding: 10px; } .lateral .marca { padding: 4px 8px; }
   .lateral .sesion { margin-top: 0; margin-left: auto; border: 0; } main { padding: 16px 14px 40px; }
 }
+
+/* soluciones rápidas (HU26) */
+tr.inactiva td { opacity: .6; }
+tr.editor td { background: var(--fondo); }
+.form-solucion { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--borde); }

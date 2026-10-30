@@ -164,6 +164,12 @@ VISTAS["ticket"] = async (cont, id) => {
           el("div", { style: "align-self:end" }, el("button", { texto: "Reasignar manualmente", onclick: () => aplicar(POST(`/api/tickets/${id}/reasignar`, { tecnico_id: sel.value }), msgAcc) }))));
       }
     }
+    if (esStaff && gestiona && (d.estado === "Resuelto" || d.estado === "Cerrado")) {  // guardar como solución rápida (HU26)
+      hayAcciones = true;
+      acciones.append(el("h3", { texto: "Solución rápida" }),
+        el("button", { texto: "Guardar como solución rápida", onclick: () => formularioSolucion(d, acciones) }),
+        el("p", { class: "suave pequeno", texto: "Si este problema es común, guárdalo: la IA lo sugerirá a los usuarios antes de registrar un ticket parecido." }));
+    }
     if (!hayAcciones) acciones.append(el("p", { class: "suave", texto: d.estado === "Cerrado" ? "Este ticket está cerrado." : "No hay acciones disponibles para ti en este momento." }));
     acciones.append(msgAcc);
 
@@ -194,3 +200,36 @@ VISTAS["ticket"] = async (cont, id) => {
   }
   await pintar(await GET("/api/tickets/" + id));
 };
+
+/* ------------------------------------------------------------------ guardar como solución rápida (HU26) */
+function resumen(texto, max = 160) {
+  const t = (texto || "").replace(/\s+/g, " ").trim();
+  const punto = t.search(/[.!?](\s|$)/);
+  const frase = punto > 20 ? t.slice(0, punto + 1) : t;
+  return frase.length > max ? frase.slice(0, max).replace(/\s+\S*$/, "") + "…" : frase;
+}
+function formularioSolucion(d, contenedor) {
+  const anterior = contenedor.querySelector(".form-solucion");
+  if (anterior) { anterior.remove(); return; }
+  const problema = el("input", { value: d.titulo, maxlength: 200 });
+  const categoria = el("select", {}, CATEGORIAS.map((c) => el("option", { value: c, texto: c, selected: c === d.categoria })));
+  const frases = el("textarea", { rows: 4 });
+  frases.value = [d.titulo, resumen(d.descripcion)].filter((x, i, a) => x && a.indexOf(x) === i).join("\n");
+  const pasos = el("textarea", { rows: 5 });
+  pasos.value = (d.solucion || "").split(/\n+|(?<=\.)\s+(?=[A-ZÁÉÍÓÚÑ])/).map((x) => x.trim()).filter(Boolean).join("\n");
+  const msg = el("div", { class: "mensaje", role: "status" });
+  const lineas = (t) => t.value.split("\n").map((x) => x.trim()).filter(Boolean);
+  const form = el("form", { class: "form-solucion", onsubmit: async (ev) => {
+    ev.preventDefault();
+    try {
+      const r = await POST("/api/soluciones", { problema: problema.value, categoria: categoria.value, frases_ejemplo: lineas(frases), pasos: lineas(pasos), ticket_id: d.id });
+      form.replaceChildren(el("div", { class: "exito" }, el("b", { texto: `Solución ${r.id} guardada.` }), " La IA ya la sugiere a tickets parecidos."));
+    } catch (e) { mensaje(msg, e.message, "error"); }
+  } },
+    el("label", {}, "Problema (como lo vería el usuario)", problema), el("label", {}, "Categoría", categoria),
+    el("label", {}, "Frases de ejemplo (una por línea: cómo lo describiría un usuario)", frases),
+    el("label", {}, "Pasos de la solución (uno por línea)", pasos),
+    el("div", { class: "acciones" }, el("button", { class: "primario", type: "submit", texto: "Guardar solución rápida" })), msg);
+  contenedor.append(form);
+  problema.focus();
+}

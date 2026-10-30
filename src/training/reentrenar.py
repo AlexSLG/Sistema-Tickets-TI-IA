@@ -17,6 +17,7 @@ import numpy as np
 import pandas as pd
 import torch
 
+from src.models import catalogo_soluciones
 from src.models.base import entrenar_base
 from src.models.comun import CATEGORIAS, PRIORIDADES, PROCESSED, RAIZ, Vocabulario, cargar_split, guardar_json, metricas, texto_ticket
 from src.models.gru_clasificador import entrenar_gru, predecir
@@ -171,7 +172,7 @@ def reentrenar(epocas=6, lr=5e-4, desde_cero=False, progreso=print, ruta_correcc
         entrenar_prioridad.entrenar_y_evaluar(d, nuevo_train, val, test, verbose=False)
         tecnicos = pd.read_csv(PROCESSED / "tecnicos.csv")
         entrenar_asignacion.entrenar_y_evaluar(d, historial_con_correcciones(corr, tecnicos), tecnicos, verbose=False)
-        soluciones = json.loads((PROCESSED / "soluciones_rapidas.json").read_text(encoding="utf-8"))
+        soluciones = catalogo_soluciones.activas(catalogo_soluciones.leer())
         entrenar_similitud.construir_y_evaluar(d, nuevo_train, val, soluciones, verbose=False)
         cfg = json.loads((d_vig / "config.json").read_text(encoding="utf-8")) if (d_vig / "config.json").exists() else {}
         cfg.update({"version": version, "base": vig["version"], "n_correcciones": n_validas})

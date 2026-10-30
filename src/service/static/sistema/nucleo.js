@@ -91,7 +91,7 @@ function pintarLogin() {
 /* ------------------------------------------------------------------ estructura, menú y rutas */
 function menuPorRol(rol) {
   if (rol === "Administrador") return [["panel", "Panel de métricas"], ["tickets", "Todos los tickets"], ["nuevo", "Nuevo ticket"], ["tecnicos", "Técnicos"],
-                                      ["usuarios", "Usuarios"], ["modelos", "Modelos de IA"]];
+                                      ["usuarios", "Usuarios"], ["soluciones", "Soluciones rápidas"], ["modelos", "Modelos de IA"]];
   if (rol === "Soporte") return [["bandeja", "Bandeja de tickets"], ["panel", "Mi resumen"]];
   return [["nuevo", "Nuevo ticket"], ["mis-tickets", "Mis tickets"]];
 }

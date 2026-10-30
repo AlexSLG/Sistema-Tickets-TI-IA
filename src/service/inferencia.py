@@ -8,11 +8,12 @@ import numpy as np
 import pandas as pd
 import torch
 
+from src.models import catalogo_soluciones
 from src.models.comun import CATEGORIAS, PRIORIDADES, PROCESSED, RAIZ, Vocabulario
 from src.models.gru_clasificador import predecir
 from src.models.mlp_asignacion import MLPAsignacion, aptitudes_matriz, balancear, features_batch, puntuar
 from src.models.mlp_prioridad import MLPPrioridad, construir_features, predecir_proba
-from src.models.similitud import IndiceTickets, SolucionesRapidas
+from src.models.similitud import IndiceTickets, SolucionesRapidas, normalizar_texto
 from src.training import registro
 from src.training.entrenar_prioridad import cargar_gru
 
@@ -24,6 +25,7 @@ class Servicio:
     """Modelos de una versión cargados en memoria + estado de carga de los técnicos."""
 
     def __init__(self, version=None):
+        self.lock = threading.Lock()
         reg = registro.cargar()
         version = version or reg["activa"]
         if version is None:
@@ -47,10 +49,30 @@ class Servicio:
         self.aptitudes = aptitudes_matriz(self.tecnicos)
         self.indice = IndiceTickets.cargar(d)
         cfg = json.loads((d / "config.json").read_text(encoding="utf-8"))
-        soluciones = json.loads((PROCESSED / "soluciones_rapidas.json").read_text(encoding="utf-8"))
-        self.rapidas = SolucionesRapidas.cargar(d, soluciones, cfg.get("umbral_solucion_rapida", 0.7))
+        # del índice guardado con la versión solo se usa el vectorizador TF-IDF; los textos se indexan desde el catálogo (HU26)
+        self.rapidas = SolucionesRapidas.cargar(d, catalogo_soluciones.leer(), cfg.get("umbral_solucion_rapida", 0.7))
+        self.recargar_soluciones()
         self.cargas = {t: int(round(CARGA_INICIAL * lim)) for t, lim in zip(self.ids, self.limites)}
-        self.lock = threading.Lock()
+
+    def recargar_soluciones(self):
+        """Reconstruye en memoria solo el índice de soluciones rápidas a partir de las entradas activas del catálogo, con la GRU y
+        el vectorizador de esta versión (los mismos que al entrenar). Tarda menos de un segundo y no modifica models/."""
+        soluciones = catalogo_soluciones.activas(catalogo_soluciones.leer())
+        textos, ids = [], []
+        for sol in soluciones:
+            for f in list(sol["frases_ejemplo"]) + [sol["problema"]]:
+                textos.append(f)
+                ids.append(sol["id"])
+        if textos:
+            X, L = self.vocab.matriz(textos)
+            E = predecir(self.gru, X, L)[1].numpy()
+        else:
+            E = np.zeros((0, 1), dtype=np.float32)
+        T = self.rapidas.vec.transform([normalizar_texto(t) for t in textos]) if textos else None
+        nuevo = SolucionesRapidas(soluciones, E, ids, self.rapidas.vec, T, self.rapidas.umbral, self.rapidas.peso)
+        with self.lock:
+            self.rapidas = nuevo
+        return len(soluciones)
 
     # ------------------------------------------------------------------ estado de técnicos
     def estado_tecnicos(self):

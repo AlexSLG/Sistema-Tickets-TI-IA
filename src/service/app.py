@@ -134,9 +134,9 @@ async def sin_cache_para_la_pagina(request, call_next):
 
 
 # ------------------------------------------------------------------ sistema de tickets (Sprints 2 y 3)
-from src.sistema.rutas import auth as _auth, panel as _panel, tecnicos as _tecnicos, tickets as _tickets, usuarios as _usuarios  # noqa: E402
+from src.sistema.rutas import auth as _auth, panel as _panel, soluciones as _soluciones, tecnicos as _tecnicos, tickets as _tickets, usuarios as _usuarios  # noqa: E402
 
-for _r in (_auth, _usuarios, _tickets, _tecnicos, _panel):
+for _r in (_auth, _usuarios, _tickets, _tecnicos, _panel, _soluciones):
     app.include_router(_r.router)
 
 

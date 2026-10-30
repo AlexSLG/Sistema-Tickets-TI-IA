@@ -70,6 +70,8 @@ class SolucionesRapidas:
 
     def consultar(self, emb, texto, umbral=None):
         umbral = self.umbral if umbral is None else umbral
+        if not self.ids:  # catálogo sin soluciones activas
+            return None
         s = self.similitudes(emb, texto)
         i = int(np.argmax(s))
         if s[i] < umbral:

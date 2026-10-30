@@ -64,6 +64,51 @@ VISTAS["usuarios"] = async (cont) => {
     el("div", { class: "tarjeta tabla-ancha" }, el("table", { class: "tabla" }, el("thead", {}, el("tr", {}, ["Nombre", "Correo", "Rol", "Activo", "Contraseña", ""].map((h) => el("th", { texto: h })))), el("tbody", {}, filas)), msg));
 };
 
+/* ------------------------------------------------------------------ soluciones rápidas (HU26) */
+VISTAS["soluciones"] = async (cont) => {
+  const lista = await GET("/api/soluciones");
+  const msg = el("div", { class: "mensaje", role: "status" });
+  const filtro = el("input", { type: "search", placeholder: "Buscar por problema, frase o categoría", "aria-label": "Buscar soluciones" });
+  const cuerpo = el("tbody");
+  const guardar = async (s, cambios) => {
+    try { await PUT("/api/soluciones/" + s.id, cambios); VISTAS["soluciones"](cont); }
+    catch (e) { mensaje(msg, e.message, "error"); }
+  };
+  const editor = (s, fila) => {
+    if (fila.nextSibling && fila.nextSibling.classList.contains("editor")) { fila.nextSibling.remove(); return; }
+    const problema = el("input", { value: s.problema, maxlength: 200 });
+    const categoria = el("select", {}, CATEGORIAS.map((c) => el("option", { value: c, texto: c, selected: c === s.categoria })));
+    const frases = el("textarea", { rows: 4 }); frases.value = s.frases_ejemplo.join("\n");
+    const pasos = el("textarea", { rows: 5 }); pasos.value = s.pasos.join("\n");
+    const lineas = (t) => t.value.split("\n").map((x) => x.trim()).filter(Boolean);
+    const ed = el("tr", { class: "editor" }, el("td", { colspan: 5 },
+      el("div", { class: "fila" }, el("label", {}, "Problema", problema), el("label", {}, "Categoría", categoria)),
+      el("label", {}, "Frases de ejemplo (una por línea)", frases), el("label", {}, "Pasos (uno por línea)", pasos),
+      el("div", { class: "acciones" }, el("button", { class: "primario", texto: "Guardar cambios", onclick: () => guardar(s, { problema: problema.value, categoria: categoria.value, frases_ejemplo: lineas(frases), pasos: lineas(pasos) }) }),
+        el("button", { texto: "Cancelar", onclick: () => ed.remove() }))));
+    fila.after(ed);
+  };
+  const pintar = () => {
+    const q = filtro.value.trim().toLowerCase();
+    cuerpo.replaceChildren(...lista.slice().reverse().filter((s) => !q || [s.id, s.problema, s.categoria, ...s.frases_ejemplo].join(" ").toLowerCase().includes(q)).map((s) => {
+      const fila = el("tr", { class: s.activa ? "" : "inactiva" },
+        el("td", {}, el("b", { texto: s.id }), s.origen === "ticket" ? el("div", { class: "suave pequeno", texto: `de ${s.ticket_origen} · ${s.creada_por}` }) : null),
+        el("td", {}, el("div", { texto: s.problema }), el("div", { class: "suave pequeno", texto: `${s.frases_ejemplo.length} frases · ${s.pasos.length} pasos` })),
+        el("td", {}, etq(s.categoria, "neutra")), el("td", {}, etq(s.activa ? "activa" : "inactiva", s.activa ? "ok" : "mal")),
+        el("td", {}, el("div", { class: "acciones" }, el("button", { texto: "Editar", onclick: () => editor(s, fila) }),
+          el("button", { texto: s.activa ? "Desactivar" : "Activar", onclick: () => guardar(s, { activa: !s.activa }) }))));
+      return fila;
+    }));
+  };
+  filtro.addEventListener("input", pintar);
+  pintar();
+  const activas = lista.filter((s) => s.activa).length, deTickets = lista.filter((s) => s.origen === "ticket").length;
+  cont.replaceChildren(el("div", { class: "cabecera" }, el("div", {}, el("h1", { texto: "Soluciones rápidas" }),
+      el("p", { class: "suave", texto: `${activas} activas de ${lista.length} (${deTickets} agregadas desde tickets). La IA sugiere una solución activa cuando el ticket se parece a sus frases de ejemplo. Para agregar una, abre un ticket Resuelto o Cerrado y pulsa «Guardar como solución rápida». Los cambios se aplican al instante.` }))),
+    el("div", { class: "tarjeta tabla-ancha" }, filtro, el("table", { class: "tabla" },
+      el("thead", {}, el("tr", {}, ["Id", "Problema", "Categoría", "Estado", ""].map((h) => el("th", { texto: h })))), cuerpo), msg));
+};
+
 /* ------------------------------------------------------------------ modelos de IA (HU27) */
 let temporizadorModelos = null;
 VISTAS["modelos"] = async (cont) => {

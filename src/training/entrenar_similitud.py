@@ -11,6 +11,7 @@ import numpy as np
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 
+from src.models import catalogo_soluciones
 from src.models.comun import PROCESSED, RAIZ, cargar_split, guardar_json, texto_ticket
 from src.models.similitud import IndiceTickets, PESO_TFIDF, SolucionesRapidas, normalizar, normalizar_texto
 from src.training.entrenar_prioridad import cargar_gru
@@ -124,7 +125,7 @@ def reconstruir_indice_soluciones(directorio, verbose=True):
     directorio = Path(directorio)
     vocab, gru = cargar_gru(directorio)
     cfg = json.loads((directorio / "config.json").read_text(encoding="utf-8"))
-    soluciones = json.loads((PROCESSED / "soluciones_rapidas.json").read_text(encoding="utf-8"))
+    soluciones = catalogo_soluciones.activas(catalogo_soluciones.leer())
     train = cargar_split("train")
     tr_real = train[train["real"]].drop_duplicates("id")
     textos_sr, ids = [], []
@@ -148,7 +149,7 @@ def main():
     a = ap.parse_args()
     if a.solo_soluciones:
         return reconstruir_indice_soluciones(a.modelos)
-    soluciones = json.loads((PROCESSED / "soluciones_rapidas.json").read_text(encoding="utf-8"))
+    soluciones = catalogo_soluciones.activas(catalogo_soluciones.leer())
     construir_y_evaluar(a.modelos, cargar_split("train"), cargar_split("val"), soluciones)
 
 
