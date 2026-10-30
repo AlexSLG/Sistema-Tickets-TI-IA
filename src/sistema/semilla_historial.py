@@ -7,6 +7,10 @@
 - La asignación usa las cargas que habría en cada momento (los tickets abiertos que siguen sin resolver en esa fecha).
 - Algunos tickets cuya categoría sugerida difiere de la etiqueta de la fuente se "corrigen" (como haría Soporte); estas correcciones
   se guardan solo en la BD, no en data/correcciones.csv.
+- Algunos tickets se reabren (el solicitante indica que el problema sigue): dos Cerrados que se resolvieron en un segundo intento y
+  uno que volvió a En progreso.
+- Un técnico guarda un ticket Cerrado como solución rápida (HU26). Se agrega al catálogo solo si no existe ya (la semilla se puede
+  repetir sin duplicarla).
 """
 import json
 import random
@@ -27,6 +31,16 @@ COMENTARIOS_TECNICO = ["Estoy revisando el caso; te aviso en cuanto tenga noveda
                        "Recibido. Empiezo a trabajar en esto ahora mismo."]
 COMENTARIOS_RESOLUCION = ["Apliqué la solución indicada; por favor confirma si el problema quedó resuelto.",
                           "Listo, el servicio quedó funcionando. Avísame si vuelve a fallar."]
+COMENTARIOS_REAPERTURA = ["Sigue pasando lo mismo, el problema volvió a aparecer.", "Lo probé otra vez y sigue sin funcionar."]
+N_REABIERTOS_CERRADOS, N_REABIERTOS_EN_PROGRESO = 2, 1
+# Lo que el técnico escribe en el formulario «Guardar como solución rápida» para el ticket de la unidad compartida
+SOLUCION_SOPORTE = {"clave": "unidad compartida", "problema": "No puedo conectarme a la unidad compartida de red",
+                    "frases_ejemplo": ["no puedo entrar a la unidad compartida", "la carpeta compartida no abre",
+                                       "me sale acceso denegado en la unidad de red", "desapareció la unidad compartida del explorador"],
+                    "pasos": ["Comprueba que estás conectado a la red de la oficina o a la VPN.",
+                              "Abre el Explorador de archivos, clic derecho sobre la unidad y elige «Desconectar»; luego vuelve a iniciar sesión en el equipo.",
+                              "Si aparece «acceso denegado», cierra sesión y vuelve a entrar para renovar tus permisos.",
+                              "Si sigue sin abrir, registra un ticket indicando el nombre de la carpeta y el mensaje de error que aparece."]}
 COMENTARIOS_USUARIO = ["Confirmado, ya funciona. Gracias.", "Todo en orden, gracias por la ayuda.", "Perfecto, quedó resuelto."]
 
 
@@ -51,7 +65,8 @@ def sembrar_historial(db: Session, n_total=60, verbose=False):
     n_rapidas = min(N_RAPIDAS, max(0, n_total // 10))
     n_csv = n_total - n_rapidas
     muestra = test.sample(n_csv, random_state=42).to_dict("records")
-    soluciones = json.loads((PROCESSED / "soluciones_rapidas.json").read_text(encoding="utf-8"))
+    from src.models import catalogo_soluciones
+    soluciones = [x for x in catalogo_soluciones.leer() if x.get("origen") != "ticket"]  # solo las del catálogo original: muestra estable
     rapidas = [{"titulo": s["frases_ejemplo"][0].capitalize(), "descripcion": s["frases_ejemplo"][0].capitalize(), "impacto": "Bajo", "urgencia": "Media",
                 "usuarios_afectados": 1, "categoria": s["categoria"], "prioridad": "Baja", "solucion": "", "rapida": True}
                for s in rng.sample(soluciones, n_rapidas)]
@@ -72,6 +87,7 @@ def sembrar_historial(db: Session, n_total=60, verbose=False):
 
     registro = []   # (técnico, instante en que deja de contar como abierto o None)
     creados = []
+    meta = {}       # ticket → (técnico, inicio del trabajo)
     correcciones = 0
     for i, (fila, estado) in enumerate(zip(slots, estados)):
         creado = inicio + timedelta(seconds=segundos[i])
@@ -134,9 +150,81 @@ def sembrar_historial(db: Session, n_total=60, verbose=False):
             db.add(Historial(ticket_id=t.id, usuario_id=t.solicitante_id, accion="estado", detalle="Cerrado: el solicitante confirmó la solución", creado_en=t.cerrado_en))
             db.add(Comentario(ticket_id=t.id, autor_id=t.solicitante_id, texto=rng.choice(COMENTARIOS_USUARIO), creado_en=t.cerrado_en - timedelta(minutes=1)))
         registro.append((tec.id, t.resuelto_en if estado in ("Resuelto", "Cerrado") else None))
+        meta[t.id] = (tec, inicio_trabajo)
         creados.append(t)
+    reabiertos = _reabrir_algunos(db, rng, creados, meta, ahora_)
     db.commit()
+    solucion = _guardar_solucion_rapida(db, creados, meta)
     if verbose:
         por_estado = pd.Series([t.estado for t in creados]).value_counts().to_dict()
         abiertas = {t.id: sum(1 for x in creados if x.tecnico_id == t.id and x.estado in ("Abierto", "En progreso")) for t in tecnicos}
-        print(f"Historial: {len(creados)} tickets {por_estado}; {correcciones} correcciones; cargas abiertas {abiertas}")
+        print(f"Historial: {len(creados)} tickets {por_estado}; {correcciones} correcciones; {reabiertos} reabiertos; "
+              f"solución rápida de Soporte: {solucion or '—'}; cargas abiertas {abiertas}")
+
+
+def _reabrir_algunos(db: Session, rng, creados, meta, ahora_):
+    """Reaperturas: el solicitante indica que el problema sigue. Cerrados: se resolvieron en un segundo intento. En progreso: el
+    técnico lo había resuelto y está trabajando de nuevo en él."""
+    n = 0
+    cerrados = [t for t in creados if t.estado == "Cerrado" and not t.resuelto_con_solucion_rapida]
+    en_progreso = [t for t in creados if t.estado == "En progreso" and meta[t.id][1] < ahora_ - timedelta(hours=3)]
+    for t in rng.sample(cerrados, min(N_REABIERTOS_CERRADOS, len(cerrados))):
+        tec, _ = meta[t.id]
+        primer = t.resuelto_en
+        reapertura = primer + (t.cerrado_en - primer) / 3
+        segundo = primer + 2 * (t.cerrado_en - primer) / 3
+        _anotar_reapertura(db, rng, t, tec, reapertura)
+        db.add(Historial(ticket_id=t.id, usuario_id=tec.usuario_id, accion="estado", creado_en=segundo,
+                         detalle="Resuelto: se repitió el procedimiento y se verificó con el usuario que el problema no vuelve a aparecer"))
+        db.add(Comentario(ticket_id=t.id, autor_id=tec.usuario_id, texto="Lo revisé de nuevo y apliqué la corrección completa; por favor confirma.",
+                          creado_en=segundo + timedelta(minutes=1)))
+        t.resuelto_en = segundo
+        n += 1
+    for t in rng.sample(en_progreso, min(N_REABIERTOS_EN_PROGRESO, len(en_progreso))):
+        tec, inicio = meta[t.id]
+        resuelto = inicio + (ahora_ - inicio) / 3
+        db.add(Historial(ticket_id=t.id, usuario_id=tec.usuario_id, accion="estado", creado_en=resuelto,
+                         detalle=f"Resuelto: {_solucion_texto({}, t.categoria)[:120]}"))
+        _anotar_reapertura(db, rng, t, tec, inicio + 2 * (ahora_ - inicio) / 3)
+        n += 1
+    return n
+
+
+def _anotar_reapertura(db, rng, t, tec, cuando):
+    db.add(Comentario(ticket_id=t.id, autor_id=t.solicitante_id, texto=rng.choice(COMENTARIOS_REAPERTURA), creado_en=cuando - timedelta(minutes=1)))
+    db.add(Historial(ticket_id=t.id, usuario_id=t.solicitante_id, accion="estado", detalle="Reabierto por el solicitante: el problema persiste",
+                     creado_en=cuando))
+    t.actualizado_en = max(t.actualizado_en, cuando)
+
+
+def _guardar_solucion_rapida(db: Session, creados, meta):
+    """Un técnico guarda un ticket Cerrado como solución rápida (como lo haría desde el detalle del ticket)."""
+    from src.models import catalogo_soluciones as catalogo
+    cerrados = [t for t in creados if t.estado == "Cerrado" and not t.resuelto_con_solucion_rapida and t.solucion]
+    candidatos = [t for t in cerrados if SOLUCION_SOPORTE["clave"] in t.titulo.lower()] or cerrados
+    if not candidatos:
+        return None
+    t = min(candidatos, key=lambda x: x.codigo)
+    tec, _ = meta[t.id]
+    soluciones = catalogo.leer()
+    redactada = SOLUCION_SOPORTE["clave"] in t.titulo.lower()
+    problema = SOLUCION_SOPORTE["problema"] if redactada else t.titulo
+    existente = next((s for s in soluciones if s.get("origen") == "ticket" and s.get("problema") == problema), None)
+    if existente is None:
+        if redactada:
+            frases, pasos = [t.titulo] + SOLUCION_SOPORTE["frases_ejemplo"], SOLUCION_SOPORTE["pasos"]
+        else:
+            frases, pasos = [t.titulo], [t.solucion[:500]]
+        existente = {"id": catalogo.siguiente_id(soluciones), "categoria": t.categoria, "problema": problema, "frases_ejemplo": frases,
+                     "pasos": pasos, "activa": True,
+                     "origen": "ticket", "ticket_origen": t.codigo, "creada_por": tec.nombre,
+                     "fecha": (t.cerrado_en + timedelta(minutes=5)).strftime("%Y-%m-%d %H:%M")}
+        catalogo.guardar(soluciones + [existente])
+        try:
+            ia.servicio().recargar_soluciones()
+        except Exception:
+            pass  # el servicio lo indexará al iniciar
+    db.add(Historial(ticket_id=t.id, usuario_id=tec.usuario_id, accion="solución rápida", creado_en=t.cerrado_en + timedelta(minutes=5),
+                     detalle=f"Guardado como {existente['id']}: {existente['problema']}"))
+    db.commit()
+    return existente["id"]

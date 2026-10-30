@@ -41,26 +41,27 @@ def test_solucion_guardada_desde_un_ticket_se_sugiere_de_inmediato(cliente):
     antes = cliente.post("/api/tickets/analizar", headers=ana, json={**IMPRESORA, "titulo": FRASE, "descripcion": FRASE}).json()
     assert antes["solucion_rapida"] is None or "moradas" not in antes["solucion_rapida"]["problema"]
     t, h = resolver(cliente, IMPRESORA)
+    esperado = catalogo_soluciones.siguiente_id(catalogo_soluciones.leer())
     r = cliente.post("/api/soluciones", headers=h, json={"problema": "La impresora imprime rayas moradas", "categoria": "Hardware",
                                                          "frases_ejemplo": [IMPRESORA["titulo"], FRASE, "salen rayas moradas al imprimir"],
                                                          "pasos": ["Limpia el rodillo de la impresora.", "Cambia el tóner morado.", "Si sigue, avisa a Soporte."],
                                                          "ticket_id": t["id"]})
     assert r.status_code == 201, r.text
     nueva = r.json()
-    assert nueva["id"] == "SR-52" and nueva["ticket_origen"] == t["codigo"] and nueva["activa"]
+    assert nueva["id"] == esperado and nueva["ticket_origen"] == t["codigo"] and nueva["activa"]
     despues = cliente.post("/api/tickets/analizar", headers=ana, json={**IMPRESORA, "titulo": FRASE, "descripcion": FRASE}).json()
-    assert despues["solucion_rapida"] and despues["solucion_rapida"]["id"] == "SR-52"
+    assert despues["solucion_rapida"] and despues["solucion_rapida"]["id"] == esperado
     detalle = cliente.get(f"/api/tickets/{t['id']}", headers=h).json()
     assert any(x["accion"] == "solución rápida" for x in detalle["historial"])
     # desactivar → deja de sugerirse; activar → vuelve
     adm = entrar(cliente, ADMIN)
-    assert cliente.put("/api/soluciones/SR-52", headers=adm, json={"activa": False}).status_code == 200
+    assert cliente.put(f"/api/soluciones/{esperado}", headers=adm, json={"activa": False}).status_code == 200
     r = cliente.post("/api/tickets/analizar", headers=ana, json={**IMPRESORA, "titulo": FRASE, "descripcion": FRASE}).json()["solucion_rapida"]
-    assert r is None or r["id"] != "SR-52"
-    cliente.put("/api/soluciones/SR-52", headers=adm, json={"activa": True, "problema": "Rayas moradas al imprimir"})
+    assert r is None or r["id"] != esperado
+    cliente.put(f"/api/soluciones/{esperado}", headers=adm, json={"activa": True, "problema": "Rayas moradas al imprimir"})
     r = cliente.post("/api/tickets/analizar", headers=ana, json={**IMPRESORA, "titulo": FRASE, "descripcion": FRASE}).json()["solucion_rapida"]
-    assert r["id"] == "SR-52" and r["problema"] == "Rayas moradas al imprimir"
-    assert next(s for s in catalogo_soluciones.leer() if s["id"] == "SR-52")["activa"]
+    assert r["id"] == esperado and r["problema"] == "Rayas moradas al imprimir"
+    assert next(s for s in catalogo_soluciones.leer() if s["id"] == esperado)["activa"]
 
 
 def test_permisos_y_validaciones(cliente):
@@ -78,4 +79,4 @@ def test_permisos_y_validaciones(cliente):
     assert cliente.post("/api/soluciones", headers=adm, json={**cuerpo, "categoria": "Otra"}).status_code == 422
     assert cliente.put("/api/soluciones/SR-999", headers=adm, json={"activa": False}).status_code == 404
     lista = cliente.get("/api/soluciones", headers=h_tec).json()
-    assert len(lista) == 51 and all(s["activa"] for s in lista)
+    assert len(lista) == len(catalogo_soluciones.leer()) >= 51 and all(s["activa"] for s in lista)

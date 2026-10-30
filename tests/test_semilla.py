@@ -4,14 +4,18 @@ from sqlalchemy import func, select
 
 from src.sistema import db as bd
 from src.sistema import ia, semilla_historial
-from src.sistema.modelos import AnalisisIA, Tecnico, Ticket
+from src.sistema.modelos import AnalisisIA, Historial, Tecnico, Ticket
 
 pytestmark = pytest.mark.usefixtures("bd_limpia")
 
 
 def test_semilla_de_historial(cliente, tmp_path, monkeypatch):
+    import shutil
     import src.training.reentrenar as re_mod
+    from src.models import catalogo_soluciones
     monkeypatch.setattr(re_mod, "CORRECCIONES", tmp_path / "no_debe_crearse.csv")
+    shutil.copy(catalogo_soluciones.RUTA, tmp_path / "sr.json")
+    monkeypatch.setattr(catalogo_soluciones, "RUTA", tmp_path / "sr.json")
     with bd.SessionLocal() as s:
         semilla_historial.sembrar_historial(s, n_total=20)
     with bd.SessionLocal() as s:
@@ -27,4 +31,19 @@ def test_semilla_de_historial(cliente, tmp_path, monkeypatch):
         cargas = ia.contexto_tecnicos(s)
         assert all(cargas["cargas"][t.id] <= t.limite_carga for t in s.scalars(select(Tecnico)))
         assert sum(cargas["cargas"].values()) == por_estado["En progreso"] + por_estado["Abierto"]
+        # reaperturas y solución rápida agregada por Soporte (HU36)
+        detalles = [h.detalle for h in s.scalars(select(Historial))]
+        assert sum("Reabierto" in d for d in detalles) == 3
+        agregadas = [x for x in catalogo_soluciones.leer() if x.get("origen") == "ticket"]
+        assert len(agregadas) == 1 and any(d.startswith(f"Guardado como {agregadas[0]['id']}") for d in detalles)
+    # repetir la semilla no duplica la solución del catálogo
+    bd.Base.metadata.drop_all(bd.engine)
+    bd.Base.metadata.create_all(bd.engine)
+    from src.sistema import semilla
+    with bd.SessionLocal() as s:
+        semilla.sembrar_usuarios_y_tecnicos(s)
+        semilla_historial.sembrar_historial(s, n_total=20)
+    assert len([x for x in catalogo_soluciones.leer() if x.get("origen") == "ticket"]) == 1
+    monkeypatch.undo()
+    ia.servicio().recargar_soluciones()
     assert not (tmp_path / "no_debe_crearse.csv").exists()  # la semilla no escribe en data/correcciones.csv
