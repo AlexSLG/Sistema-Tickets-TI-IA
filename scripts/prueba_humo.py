@@ -6,6 +6,8 @@ Deja tickets nuevos en la base de datos (no borra nada); al terminar restablece 
 """
 import sys
 
+sys.stdout.reconfigure(encoding="utf-8")  # la consola de Windows (cp1252) no muestra ✔ ni otros caracteres
+
 import httpx
 
 BASE = sys.argv[1] if len(sys.argv) > 1 else "http://localhost:8001"
